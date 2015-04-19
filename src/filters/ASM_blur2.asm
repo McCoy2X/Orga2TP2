@@ -8,4 +8,11 @@
 ; void ASM_blur2( uint32_t w, uint32_t h, uint8_t* data )
 global ASM_blur2
 ASM_blur2:
-  ret
+	PUSH RBP
+	MOV  RBP, RSP
+
+	
+
+	POP  RBP
+
+	RET

@@ -44,3 +44,8 @@
 *.vrb
 *.xdy
 *.tdo
+
+### Imagenes Procesadas ###
+/tests/data/imagenes_a_testear
+/tests/data/resultados_catedra
+/tests/data/resultados_nuestros
