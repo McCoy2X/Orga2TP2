@@ -30,6 +30,8 @@ ASM_blur1:
 	MOV  R14D, EDI
 	MOV  R15D, ESI
 
+	MOVDQU XMM12, [dosk]
+
 	; Calculo el width en bytes
 	MOV  RAX, 4
 	MUL  R14
@@ -74,24 +76,21 @@ ASM_blur1:
 			PXOR      XMM14, XMM14
 			PXOR      XMM13, XMM13
 			; Tomo los 9 pixeles de memoria
-			MOVDQU    XMM0, [R12 + RDI]	; XMM0 = x | p2 | p1 | p0
-			MOVDQU    XMM1, XMM0		; XMM1 = x | p2 | p1 | p0
-			MOVDQU    XMM2, XMM0		; XMM2 = x | p2 | p1 | p0
+			MOVDQU    XMM1, [R12 + RDI]	; XMM1 = x | p2 | p1 | p0
+			MOVDQU    XMM2, XMM1		; XMM2 = XMM1
 			PUNPCKLBW XMM1, XMM15		; XMM1 = p1 | p0
 			PUNPCKHBW XMM2, XMM15		; XMM2 = xx | p2
 
-			MOVDQU    XMM0, [R13 + RDI]	; XMM0 = x | p5 | p4 | p3
-			MOVDQU    XMM3, XMM0		; XMM3 = x | p5 | p4 | p3
-			MOVDQU    XMM4, XMM0		; XMM4 = x | p5 | p4 | p3
+			MOVDQU    XMM3, [R13 + RDI]	; XMM3 = x | p5 | p4 | p3
+			MOVDQU    XMM4, XMM3		; XMM4 = XMM3
 			PUNPCKLBW XMM3, XMM15		; XMM3 = p4 | p3
 			PUNPCKHBW XMM4, XMM15		; XMM4 = xx | p5
 
-			MOVDQU    XMM0, [R8  + RDI - 4]	; XMM0 = x | p8 | p7 | p6
-			PSRLDQ    XMM0, 4			; XMM14 = xx | p1 + p4 + p7
-			MOVDQU    XMM5, XMM0		; XMM5 = x | p8 | p7 | p6
-			MOVDQU    XMM6, XMM0		; XMM6 = x | p8 | p7 | p6
-			PUNPCKLBW XMM5, XMM15		; XMM5 = p7 | p6
-			PUNPCKHBW XMM6, XMM15		; XMM6 = xx | p8
+			MOVDQU    XMM5, [R8  + RDI - 4]	; XMM5 = p8 | p7 | p6 | x
+			PSRLDQ    XMM5, 4				; XMM5 = x | p8 | p7 | p6
+			MOVDQU    XMM6, XMM5			; XMM6 = XMM5
+			PUNPCKLBW XMM5, XMM15			; XMM5 = p7 | p6
+			PUNPCKHBW XMM6, XMM15			; XMM6 = xx | p8
 
 			; Sumo los 9 pixeles
 			PADDUSW   XMM15, XMM1		; XMM15 = p1 | p0
@@ -107,11 +106,9 @@ ASM_blur1:
 
 			; Divido por 9
 			; Guardo dosk para division
-			.p:
-			MOVDQU 	  XMM13, [dosk]
 			MOVDQU    XMM14, XMM15
-			PMULHW    XMM15, XMM13		; High of psum * dosk
-			PMULLW    XMM14, XMM13		; Low of psum * dosk
+			PMULHW    XMM15, XMM12		; High of psum * dosk
+			PMULLW    XMM14, XMM12		; Low of psum * dosk
 			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
 			PSRLD     XMM14, 16
 			PXOR      XMM15, XMM15
