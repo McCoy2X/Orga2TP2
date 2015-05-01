@@ -12,12 +12,16 @@ section .data
 
 dosk: DW 7283, 7283, 7283, 7283, 7283, 7283, 7283, 7283 ; 7283 = (int)((2^16 / 9) + 1)
 
+floor: DD 0x7F80
+
 ; void ASM_blur2( uint32_t w, uint32_t h, uint8_t* data )
 ; EDI w, ESI h, RDX *data
 section .text
 
 global ASM_blur2
 ASM_blur2:
+	LDMXCSR [floor]
+
 	PUSH RBP
 	MOV  RBP, RSP
 	PUSH R12
@@ -30,7 +34,7 @@ ASM_blur2:
 	MOV  R14D, EDI
 	MOV  R15D, ESI
 
-	MOVDQU XMM12, [dosk]
+	MOVDQU XMM13, [dosk]
 
 	; Calculo el width en bytes
 	MOV  RAX, 4
@@ -76,7 +80,6 @@ ASM_blur2:
 			; Clear XMM to unpack with ceroes
 			PXOR      XMM15, XMM15
 			PXOR      XMM14, XMM14
-			PXOR      XMM13, XMM13
 			; Tomo los pixeles de memoria
 			MOVDQU    XMM0, [R12 + RDI]	; XMM0 = p3 | p2 | p1 | p0
 			MOVDQU    XMM1, XMM0		; XMM1 = XMM0
@@ -120,12 +123,10 @@ ASM_blur2:
 			PADDUSW   XMM15, XMM10		; XMM15 = p1 + p2 + p3 + p7 + p8 + p9 + p13 + p14 + p15 | p0 + p1 + p2 + p6 + p7 + p8 + p12 + p13 + p14
 
 			; Divido por 9
-			; Guardo dosk para division
 			MOVDQU    XMM0, XMM15
-			MOVDQU 	  XMM13, [dosk]
 			MOVDQU    XMM14, XMM15
-			PMULHW    XMM15, XMM12		; High of psum * dosk
-			PMULLW    XMM14, XMM12		; Low of psum * dosk
+			PMULHW    XMM15, XMM13		; High of psum * dosk
+			PMULLW    XMM14, XMM13		; Low of psum * dosk
 			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
 			PSRLD     XMM14, 16
 			PXOR      XMM15, XMM15
@@ -137,10 +138,9 @@ ASM_blur2:
 
 			MOVDQU    XMM15, XMM0
 			PSRLDQ    XMM15, 8
-			MOVDQU 	  XMM13, [dosk]
 			MOVDQU    XMM14, XMM15
-			PMULHW    XMM15, XMM12		; High of psum * dosk
-			PMULLW    XMM14, XMM12		; Low of psum * dosk
+			PMULHW    XMM15, XMM13		; High of psum * dosk
+			PMULLW    XMM14, XMM13		; Low of psum * dosk
 			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
 			PSRLD     XMM14, 16
 			PXOR      XMM15, XMM15
@@ -156,14 +156,13 @@ ASM_blur2:
 			; Clear XMM to unpack with ceroes
 			PXOR      XMM15, XMM15
 			PXOR      XMM14, XMM14
-			PXOR      XMM13, XMM13
 			MOVDQU    XMM0, [R12 + RDI + 8]	; XMM0 = p5 | p4 | p3 | p2
 			MOVDQU    XMM1, XMM0		; XMM1 = XMM0
 			PUNPCKLBW XMM0, XMM15		; XMM0 = p3 | p2
 			PUNPCKHBW XMM1, XMM15		; XMM1 = p5 | p4
 
 			MOVDQU    XMM4, [R13 + RDI + 8]	; XMM4 = p11 | p10 | p9 | p8
-			MOVDQU    XMM5, XMM6		; XMM5 = XMM6
+			MOVDQU    XMM5, XMM4		; XMM5 = XMM4 
 			PUNPCKLBW XMM4, XMM15		; XMM4 = p9 | p8
 			PUNPCKHBW XMM5, XMM15		; XMM5 = p11 | p10
 
@@ -184,42 +183,99 @@ ASM_blur2:
 			PADDUSW   XMM15, XMM11		; XMM15 = p3 + p4 + p5 + p9 + p10 + p11 + p15 + p16 + p17 | p2 + p3 + p4 + p8 + p9 + p10 + p14 + p15 + p16
 
 			; Divido por 9
-			; Guardo dosk para division
+			; Salto al final si llegue al fin de la linea
 			MOVDQU    XMM0, XMM15
-			MOVDQU 	  XMM13, [dosk]
-			MOVDQU    XMM14, XMM15
-			PMULHW    XMM15, XMM12		; High of psum * dosk
-			PMULLW    XMM14, XMM12		; Low of psum * dosk
+			MOVDQU    XMM14, XMM15		; XMM14 = XMM15
+			PMULHW    XMM15, XMM13		; High of psum * dosk
+			PMULLW    XMM14, XMM13		; Low of psum * dosk
 			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
 			PSRLD     XMM14, 16
 			PXOR      XMM15, XMM15
 			PACKUSDW  XMM14, XMM15
 			PACKUSWB  XMM14, XMM15
 
-			MOVD      EDX, XMM14			; Muevo a registro de proposito general
-			MOV DWORD [R10 + RDI + 12], EDX	; Escribo en memoria (Imagen)
+			MOVD DWORD [R10 + RDI + 12], XMM14	; Escribo en memoria (Imagen)
 
 			MOVDQU    XMM15, XMM0
 			PSRLDQ    XMM15, 8
-			MOVDQU 	  XMM13, [dosk]
-			MOVDQU    XMM14, XMM15
-			PMULHW    XMM15, XMM12		; High of psum * dosk
-			PMULLW    XMM14, XMM12		; Low of psum * dosk
+			MOVDQU    XMM14, XMM15		; XMM14 = XMM15
+			PMULHW    XMM15, XMM13		; High of psum * dosk
+			PMULLW    XMM14, XMM13		; Low of psum * dosk
 			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
 			PSRLD     XMM14, 16
 			PXOR      XMM15, XMM15
 			PACKUSDW  XMM14, XMM15
 			PACKUSWB  XMM14, XMM15
 
-			MOVD      EDX, XMM14			; Muevo a registro de proposito general
-			MOV DWORD [R10 + RDI + 16], EDX	; Escribo en memoria (Imagen)
+			MOVD DWORD [R10 + RDI + 16], XMM14	; Escribo en memoria (Imagen)
 
 			; Me muevo y checkeo si llegue al final de la linea
-			ADD RDI, 8
+			ADD RDI, 16
 			MOV R11, R14
-			SUB R11, 8
+			SUB R11, 16
 			CMP RDI, R11	; Veo si llegue al final
 			JL  .ciclox
+
+			; Blureo los ultimos 2 bytes de la linea
+			PXOR      XMM15, XMM15
+			MOVDQU    XMM0, [R12 + RDI]	; XMM0 = p3 | p2 | p1 | p0
+			MOVDQU    XMM1, XMM0		; XMM1 = XMM0
+			MOVDQU    XMM3, XMM0		; XMM1 = XMM0
+			PUNPCKLBW XMM0, XMM15		; XMM0 = p1 | p0
+			PUNPCKHBW XMM1, XMM15		; XMM1 = p3 | p2
+			PSRLDQ    XMM3, 4
+			PUNPCKLBW XMM3, XMM15		
+			MOVDQU    XMM4, [R13 + RDI]	; XMM4 = p9 | p8 | p7 | p6
+			MOVDQU    XMM5, XMM4		; XMM5 = XMM4
+			MOVDQU    XMM7, XMM4		; XMM1 = XMM0
+			PUNPCKLBW XMM4, XMM15		; XMM4 = p7 | p6
+			PUNPCKHBW XMM5, XMM15		; XMM5 = p9 | p8
+			PSRLDQ    XMM7, 4
+			PUNPCKLBW XMM7, XMM15		
+			MOVDQU    XMM8, [R8  + RDI]	; XMM8 = p15 | p14 | p13 | p12
+			MOVDQU    XMM9, XMM8		; XMM9 = XMM8
+			MOVDQU    XMM11, XMM8		; XMM1 = XMM0
+			PUNPCKLBW XMM8, XMM15		; XMM8 = p13 | p12
+			PUNPCKHBW XMM9, XMM15		; XMM9 = p15 | p14
+			PSRLDQ    XMM11, 4
+			PUNPCKLBW XMM11, XMM15		
+
+			; Sumo los 9 pixeles de 2 y 3, guardo el resultado en XMM15
+			PADDUSW   XMM15, XMM0		; XMM15 = p3 | p2
+			PADDUSW   XMM15, XMM1		; XMM15 = p3 + p5 | p2 + p4
+			PADDUSW   XMM15, XMM3		; XMM15 = p3 + p4 + p5 | p2 + p3 + p4
+			PADDUSW   XMM15, XMM4		; XMM15 = p3 + p4 + p5 + p9 | p2 + p3 + p4 + p8
+			PADDUSW   XMM15, XMM5		; XMM15 = p3 + p4 + p5 + p9 + p11 | p2 + p3 + p4 + p8 + p10
+			PADDUSW   XMM15, XMM7		; XMM15 = p3 + p4 + p5 + p9 + p10 + p11 | p2 + p3 + p4 + p8 + p9 + p10
+			PADDUSW   XMM15, XMM8		; XMM15 = p3 + p4 + p5 + p9 + p10 + p11 + p15 | p2 + p3 + p4 + p8 + p9 + p10 + p14
+			PADDUSW   XMM15, XMM9		; XMM15 = p3 + p4 + p5 + p9 + p10 + p11 + p15 + p17 | p2 + p3 + p4 + p8 + p9 + p10 + p14 + p16
+			PADDUSW   XMM15, XMM11		; XMM15 = p3 + p4 + p5 + p9 + p10 + p11 + p15 + p16 + p17 | p2 + p3 + p4 + p8 + p9 + p10 + p14 + p15 + p16
+
+			; Divido por 9
+			MOVDQU    XMM0, XMM15
+			MOVDQU    XMM14, XMM15
+			PMULHW    XMM15, XMM13		; High of psum * dosk
+			PMULLW    XMM14, XMM13		; Low of psum * dosk
+			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
+			PSRLD     XMM14, 16
+			PXOR      XMM15, XMM15
+			PACKUSDW  XMM14, XMM15
+			PACKUSWB  XMM14, XMM15
+
+			MOVD DWORD [R10 + RDI + 4], XMM14	; Escribo en memoria (Imagen)
+
+			MOVDQU    XMM15, XMM0
+			PSRLDQ    XMM15, 8
+			MOVDQU    XMM14, XMM15
+			PMULHW    XMM15, XMM13		; High of psum * dosk
+			PMULLW    XMM14, XMM13		; Low of psum * dosk
+			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
+			PSRLD     XMM14, 16
+			PXOR      XMM15, XMM15
+			PACKUSDW  XMM14, XMM15
+			PACKUSWB  XMM14, XMM15
+
+			MOVD DWORD [R10 + RDI + 8], XMM14	; Escribo en memoria (Imagen)
 
 		; Recorro y copio las 2 filas de pixeles siguientes
 		MOV RDI, 0 		; Iterador

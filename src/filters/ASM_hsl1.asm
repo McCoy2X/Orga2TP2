@@ -6,8 +6,118 @@
 ; ************************************************************************* ;
 
 ; void ASM_hsl1(uint32_t w, uint32_t h, uint8_t* data, float hh, float ss, float ll)
+; EDI = w, ESI = h, RDX = data, XMM0 = hh, XMM1 = ss, XMM2 = ll
 global ASM_hsl1
-ASM_hsl1:
-  ret
-  
 
+extern malloc
+extern rgbTOhsl
+extern free
+extern hslTOrgb
+
+%define HUE        12
+%define SATURATION 8
+%define LIGHT      4
+%define TAM_FLOAT  4
+
+section .rodata
+
+section .data
+
+masc_sup: dd 0.0, 0.0, 1.0, 1.0
+masc_inf: dd 0.0, 0.0, 0.0, 0.0
+cte_360: dd 0.0, 360.0, 0.0, 0.0
+
+section .text
+
+ASM_hsl1:
+        push rbp
+        push rbx
+        mov rbp, rsp
+        sub rsp, 16
+        push r12
+        push r13
+        push r14
+        push r15
+        sub rsp, 8
+
+        mov r13, rdx
+        ;mov r14d, edi
+        ;mov r15d, esi
+
+        mov rax, rdi
+        mul rsi
+        mov rbx, 4
+        mul rbx
+        mov rbx, rax
+
+        ; Guardo los XMM en el Stack
+
+        movss [rbp - HUE], xmm0
+        movss [rbp - SATURATION], xmm1
+        movss [rbp - LIGHT], xmm2
+
+        ; Genero el lugar para almacenar los 4 pixelocos
+        mov rdi, 16
+        call malloc
+        mov r12, rax
+        mov r14d, 0
+
+        .ciclo:
+        cmp r14d, ebx
+        je .fin
+        ; Lentamente me comienzo a cagar en todo
+        ; Cargo las cosas como corresponde y veo que esto lo convierta
+        lea rdi, [r13 + r14]
+        mov rsi, r12
+        call rgbTOhsl
+
+        movdqu xmm0, [rbp - 16] ; XMM0 = ll | ss | hh | x
+        movdqu xmm1, [r12]      ; XMM1 = l | s | h | x
+
+        addps xmm0, xmm1        ; XMM0 = ll + l | ss + s | hh + h | x
+        movdqu xmm4, xmm0       ; XMM4 = XMM0
+        movdqu xmm5, xmm0       ; XMM5 = XMM0
+
+        movdqu xmm2, [masc_sup] ; XMM5 = 1.0 |  1.0  | 0.0 | x
+        movdqu xmm3, [masc_inf] ; XMM3 = 0.0 |  0.0  | 0.0 | x
+
+        movdqu xmm6, [cte_360]  ; XMM6 = 0.0 | 0.0 | 360.0 | x
+        movdqu xmm7, [masc_inf] ; XMM7 = 0.0 | 0.0 |  0.0  | x
+        movdqu xmm8, xmm6       ; Me guardo el 360 en estos registros, despues los voy a
+        movdqu xmm9, xmm6       ; sumar con la copia en XMM5
+
+        minps xmm4, xmm2        ;
+        maxps xmm4, xmm3        ; XMM4 = ll_p | ss_p | 0.0 | x
+
+        shufps xmm0, xmm4, 0xE4 ; XMM0 = ll_p | ss_p | hh + h | x
+
+        cmpps xmm6, xmm5, 2     ; hh + h >= 360?
+        cmpps xmm7, xmm5, 2     ; hh + h >= 0?
+        andps xmm6, xmm8        ; (hh + h) >= 360 ? XMM6[2] = 360 : XMM6[2] = 0
+        andnps xmm7, xmm9       ; !((hh + h) >= 0) ? XMM7[2] = 360 : XMM7[2] = 0
+
+        subps xmm0, xmm6        ; XMM0 = ll_p | ss_p | hh + h - XMM6[2] | x
+        addps xmm0, xmm7        ; XMM0 = ll_p | ss_p | hh + h + XMM7[2] | x
+
+        movdqu [r12], xmm0
+
+        mov rdi, r12
+        lea rsi, [r13 + r14]
+        call hslTOrgb
+        add r14, 4
+        jmp .ciclo
+
+        .fin:
+        mov rdi, r12
+        call free
+
+        add rsp, 8
+        pop r15
+        pop r14
+        pop r13
+        pop r12
+        add rsp, 16
+        pop rbx
+        pop rbp
+
+        ret

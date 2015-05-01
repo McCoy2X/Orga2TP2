@@ -5,93 +5,110 @@
 ;                                                                           ;
 ; ************************************************************************* ;
 
-extern malloc
-extern free
+section .data
+
+ones: DD 1.0, 1.0, 1.0, 1.0
+
+;floor: DD 0x7F80
 
 ; void ASM_merge1(uint32_t w, uint32_t h, uint8_t* data1, uint8_t* data2, float value)
 ; EDI w, ESI, h, RDX *data1, RCX *data2, XMM0 value
+section .text
+
 global ASM_merge1
 ASM_merge1:
-	; PUSH RBP
-	; MOV  RBP, RSP
-	; PUSH RBX
-	; PUSH R12
-	; PUSH R13
-	; PUSH R14
-	; PUSH R15
-	; SUB  RSP, 8
+	;LDMXCSR [floor]
 
-	; ; Guardo los inputs
-	; MOV  R12D, EDI	; R12 = w
-	; MOV  R13D, ESI	; R13 = h
-	; MOV  R14, RDX	; R14 = *data1
-	; MOV  R15, RCX	; R15 = *data2
-	; SUB  RSP, 16
-	; MOVDQU [RSP], XMM0
+	PUSH RBP
+	MOV  RBP, RSP
+	PUSH R12
 
-	; ; Veo la cantidad de pixels en bytes
-	; MOV  RDI, R12
-	; MOV  RAX, 4
-	; MUL  RDI
-	; MOV  R12, RAX
+	; Calculo fila en bytes
+	MOV  R8, RDX	; Guardo momentaneamente RDX
+	MOV  RAX, 4		; RAX = 4
+	MUL  RDI		; RAX = 4 * RDI | RDX = 0
+	MOV  RDI, RAX	; RDI = RAX
+	MOV  RDX, R8	; Restauro RDX
 
-	; ; Pido memoria para cargar las 2 filas
-	; MOV  RDI, R12
-	; CALL malloc
-	; MOV  RBX, RAX		; RBX = *filad1
-	; MOV  RDI, R12
-	; CALL malloc
-	; MOV  RCX, RAX		; RCX = *filad2
+	; Calculo los floats para multiplicar luego
+	PXOR      XMM10, XMM10				; 0 para el unpack
+	MOVDQU    XMM15, XMM0				; XMM15 = x | x | x | v
+	SHUFPS    XMM15, XMM15, 0x00		; Shuffle float con mascara 8'b00000000	XMM15 = v | v | v | v
+	MOVDQU    XMM14, [ones]				; XMM14 = 1.0 | 1.0 | 1.0 | 1.0
+	SUBPS     XMM14, XMM15				; XMM14 = 1.0 - v | 1.0 - v | 1.0 - v | 1.0 - v
 
-	; ; Recupero en XMM15 value
-	; MOVDQU XMM15, [RSP] 
-	; ADD    RSP, 16
-	; PEXTRD RDI, XMM15, 0
-	; PINSRQ XMM15, RDI, 1
-	; PINSRQ XMM15, RDI, 2
-	; PINSRQ XMM15, RDI, 3
-	; MOVDQU XMM14, 1
-	; PEXTRD RDI, XMM14, 0
-	; PINSRQ XMM14, RDI, 1
-	; PINSRQ XMM14, RDI, 2
-	; PINSRQ XMM14, RDI, 3
+	; Ciclo de mergeo
+	MOV  R11, 0			; Iterador en y bytes
+	MOV  R12, 0			; Iterador en y
+	.cicloy:
 
-	; ; Cargo las 2 filas en memoria
-	; MOV  RDI, 0
-	; .getFilas:
-	; 	MOV  EDX, [R14 + RDI * 4]	; Copio los pixeles de *data1
-	; 	MOV  [RBX + RDI * 4], EDX
-	; 	MOV  EDX, [R15 + RDI * 4]	; Copio las pixeles de *data2
-	; 	MOV  [RCX + RDI * 4], EDX
-	; 	ADD  RDI, 1
-	; 	CMP  RDI, R12
-	; 	JL   .getFilas
+		MOV  R8, 0	; R8 iterador de x
 
-	; ; Ciclo de mergeo
-	; MOV  RDI, 0	; RDI iterador de x
-	; PXOR XMM1
-	; .cicloy:
-	; 	MOV  
+		.ciclox:
+			; Pido los pixeles (4 de cada imagen)
+			LEA       R10, [RDX + R11]	; Tomo posicion memoria pixeles *data1
+			MOVDQU    XMM0, [R10 + R8]	; XMM0 = p3 | p2 | p1 | p0
+			LEA       R10, [RCX + R11]	; Tomo posicion memoria pixeles *data2
+			MOVDQU    XMM1, [R10 + R8]	; XMM1 = p3' | p2' | p1' | p0'
+			MOVDQU    XMM2, XMM0
+			MOVDQU    XMM3, XMM1
 
-	; 	.ciclox:
-	; 		MOVDQU XMM0, [RBX + RDI]	; XMM0 = p3 | p2 | p1 | p0
+			; Los sumo
+			CALL      addPixels
+			MOVDQU    XMM4, XMM0		; XMM4 = p0 * v + p0' * (1-v)
+			CALL      addPixels
+			MOVDQU    XMM5, XMM0		; XMM5 = p1 * v + p1' * (1-v)
+			CALL      addPixels
+			MOVDQU    XMM6, XMM0		; XMM5 = p2 * v + p2' * (1-v)
+			CALL      addPixels
+			MOVDQU    XMM7, XMM0		; XMM5 = p3 * v + p3' * (1-v)
 
-	; 		PUNPCKLWD XMM0, XMM1        ; Empaqueto las words en doblewords
-	; 		CVTDQ2PS  XMM0, XMM0        ; Transformo las doblewords a float
-	; 		DIVPS     XMM0, XMM15       ; Divido por 9 los 4 floats
-	; 		CVTPS2DQ  XMM0, XMM0        ; Transformo los floats a doublewords
-	; 		PACKUSDW  XMM0, XMM1        ; Desenpacketo como word
-	; 		PACKUSWB  XMM0, XMM1        ; Desempaqueto como byte
+			; Los copio en *data1
+			LEA        R10, [RDX + R11]			; Cargo la posicion de meoria
+			MOVD DWORD [R10 + R8], XMM4			; p0
+			MOVD DWORD [R10 + R8 + 4], XMM5		; p1
+			MOVD DWORD [R10 + R8 + 8], XMM6		; p2
+			MOVD DWORD [R10 + R8 + 12], XMM7	; p3
 
-	; 	ADD RDI, 4
-	; 	CMP RDI, R12
-	; 	JL .ciclox
+		ADD R8, 16	; Me muevo al siguiente grupo de pixeles
+		CMP R8, RDI	; Veo si llegue al final de la fila
+		JL .ciclox
 
-	; ADD  RSP, 8
-	; POP  R15
-	; POP  R14
-	; POP  R13
-	; POP  R12
-	; POP  RBX
-	; POP  RSP
-	; RET
+	.endx:
+	ADD  R11, RDI	; Muevo R11 a la siguiente fila
+	INC  R12		; Incremento R12
+	CMP  R12, RSI	; Veo si llegue al final de todo
+	JL  .cicloy
+
+	POP  R12
+	POP  RBP
+	RET
+
+addPixels:
+	; Restauro los valores de las copias
+	MOVDQU    XMM0, XMM2
+	MOVDQU    XMM1, XMM3
+
+	; Multiplico XMM0
+	PUNPCKLBW XMM0, XMM10	; XMM0 Bytes a words
+	PUNPCKLWD XMM0, XMM10	; XMM0 Words a doublewords
+	CVTDQ2PS  XMM0, XMM0	; XMM0 Doublewords a floats
+	MULPS     XMM0, XMM15	; XMM0 = a * v | r * v | ...
+
+	; Multiplico XMM1
+	PUNPCKLBW XMM1, XMM10	; XMM1 Bytes a words
+	PUNPCKLWD XMM1, XMM10	; XMM1 Words a doublewords
+	CVTDQ2PS  XMM1, XMM1	; XMM1 Doublewords a floats
+	MULPS     XMM1, XMM14	; XMM1 = a * (1-v) | r * (1-v) | ...
+
+	ADDPS     XMM0, XMM1	; XMM0 = a * v + a * (1-v) | ...
+
+	CVTPS2DQ  XMM0, XMM0	; XMM0 Floats a doublewords
+	PACKUSDW  XMM0, XMM10	; XMM0 Doublewords a words
+	PACKUSWB  XMM0, XMM10	; XMM0 Words a bytes
+
+	; Shifteo las copias para en el proximo addPixels tomar otro pixel
+	PSRLDQ    XMM2, 4
+	PSRLDQ    XMM3, 4
+
+	RET

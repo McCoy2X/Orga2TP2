@@ -12,12 +12,16 @@ section .data
 
 dosk: DW 7283, 7283, 7283, 7283, 7283, 7283, 7283, 7283 ; 7283 = (int)((2^16 / 9) + 1)
 
+floor: DD 0x7F80
+
 ; void ASM_blur1( uint32_t w, uint32_t h, uint8_t* data )
 ; EDI w, ESI h, RDX *data
 section .text
 
 global ASM_blur1
 ASM_blur1:
+	LDMXCSR [floor]
+
 	PUSH RBP
 	MOV  RBP, RSP
 	PUSH R12
@@ -30,6 +34,7 @@ ASM_blur1:
 	MOV  R14D, EDI
 	MOV  R15D, ESI
 
+	; Guardo el dosk
 	MOVDQU XMM12, [dosk]
 
 	; Calculo el width en bytes
@@ -106,17 +111,16 @@ ASM_blur1:
 
 			; Divido por 9
 			; Guardo dosk para division
-			MOVDQU    XMM14, XMM15
+			MOVDQU    XMM14, XMM15		; XMM14 = XMM15
 			PMULHW    XMM15, XMM12		; High of psum * dosk
 			PMULLW    XMM14, XMM12		; Low of psum * dosk
 			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
-			PSRLD     XMM14, 16
-			PXOR      XMM15, XMM15
-			PACKUSDW  XMM14, XMM15
-			PACKUSWB  XMM14, XMM15
+			PSRLD     XMM14, 16			; XMM14 >> 16
+			PXOR      XMM15, XMM15		; XMM15 = 0
+			PACKUSDW  XMM14, XMM15		; 
+			PACKUSWB  XMM14, XMM15		; 
 
-			MOVD      EDX, XMM14			; Muevo a registro de proposito general
-			MOV DWORD [R10 + RDI + 4], EDX	; Escribo en memoria (Imagen)
+			MOVD DWORD [R10 + RDI + 4], XMM14	; Escribo en memoria (Imagen)
 
 			; Me muevo y checkeo si llegue al final de la linea
 			ADD RDI, 4
