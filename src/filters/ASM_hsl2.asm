@@ -22,29 +22,38 @@ section .rodata
 
 section .data
 
+align 16
 masc_sup: dd 0.0, 0.0, 1.0, 1.0
 masc_inf: dd 0.0, 0.0, 0.0, 0.0
 masc_max: dq 0x7FFF7FFF7FFF7FFF, 0x7FFF7FFF7FFF7FFF
 masc_abs: dq 0x7FFFFFFF7FFFFFFF, 0x7FFFFFFF7FFFFFFF
 cte_360: dd 0.0, 360.0, 0.0, 0.0
 cte_360_lsb: dd 360.0, 0.0, 0.0, 0.0
-cte_60: dd 0.0, 60.0, 60.0, 60.0
+cte_60: dd 60.0, 60.0, 60.0, 60.0
 cte_510: dd 510.0, 510.0, 510.0, 510.0
 cte_2: dd 2.0, 2.0, 2.0, 2.0
 cte_1: dd 1.0, 1.0, 1.0, 1.0
 cte_255: dd 0.0, 0.0, 0.0, 255.0001
+cte_255_4: dd 255.0, 255.0, 255.0, 255.0
 align 16
 cte_suma: dd 0.0, 4.0, 2.0, 6.0
+;cte_cmp1: dd 180.0, 240.0, 300.0, 360.0
+;cte_cmp2: dd 120.0, 180.0, 240.0, 300.0
+cte_cmp1: dd 360.0, 300.0, 240.0, 180.0
+cte_cmp2: dd 300.0, 240.0, 180.0, 120.0
+;cte_cmp3: dd 0.0, 0.0, 60.0, 120.0
+;cte_cmp4: dd 0.0, 0.0, 0.0, 60.0
+cte_cmp3: dd 120.0, 60.0, 0.0, 0.0
+cte_cmp4: dd 60.0, 0.0, 0.0, 0.0
 limpiar: dd 0x0, 0x0, 0x0, 0xFFFFFFFF
 limpiar_lsb: dd 0xFFFFFFFF, 0x0, 0x0, 0x0
 limpiar_msb: dd 0x0, 0x0, 0x0, 0xFFFFFFFF
 limpiar_h: dd 0x0, 0xFFFFFFFF, 0x0, 0x0
-floor: dd 0x7F80
+temp: dd 360.0, 360.0, 360.0, 360.0
 
 section .text
 
 ASM_hsl2:
-        ldmxcsr [floor]
 
         push rbp
         push rbx
@@ -84,11 +93,9 @@ ASM_hsl2:
         je .fin
         ; Lentamente me comienzo a cagar en todo
         ; Cargo las cosas como corresponde y veo que esto lo convierta
-        lea rdi, [r13 + r14]
-        mov rsi, r12
-        call rgbTOhsl
         ; COSO
-        movdqu xmm15, [r12]
+
+        movd xmm15, [r13+r14]
 
         movd xmm1, [r13 + r14]  ; XMM1 = b | g | r | x (en int8)
         pxor xmm2, xmm2         ; XMM2 = 0
@@ -124,20 +131,17 @@ ASM_hsl2:
         pcmpeqd xmm3, xmm2      ; XMM3 = cmin == cmax | b == cmax | g == cmax | r == cmax
         pshufd xmm4, xmm3, 0x1B ; XMM4 =   r == cmax  | g == cmax | b == cmax | cmin == cmax
         movdqu xmm11, xmm4      ; XMM11= XMM4
-        pslldq xmm11, 4
-        por xmm4, xmm11
-        pslldq xmm11, 4
-        por xmm4, xmm11
-        pslldq xmm11, 4
-        por xmm4, xmm11
-        movdqu xmm11, xmm4
-        pslldq xmm11, 4
-        pxor xmm4, xmm11
-        ; En XMM3 tengo la mascara que me va a filtar despues las sumas, la idea es hacer
-        ; todas las sumas (al pedo, pero bueh, me evito saltos :P), hacer alto PAND con la
-        ; mascara y clavarme terrible suma horizontal. SSSE3 BITCHES :P
+        pslldq xmm11, 4         ;
+        por xmm4, xmm11         ;
+        pslldq xmm11, 4         ;
+        por xmm4, xmm11         ;
+        pslldq xmm11, 4         ;
+        por xmm4, xmm11         ;
+        movdqu xmm11, xmm4      ;
+        pslldq xmm11, 4         ;
+        pxor xmm4, xmm11        ; Limpio el resultado de XMM4 en caso de que haya empate
+        ; En XMM4 tengo la mascara que me va a filtar despues las sumas
 
-        ; Regs al pedo: XMM0, XMM7, ...
         ; CALCULO DE H
         pshufd xmm7, xmm1, 0xB4   ; XMM7  =      g      |      b      |      r      |      0
         pshufd xmm8, xmm1, 0xD8   ; XMM8  =      b      |      r      |      g      |      0
@@ -236,9 +240,133 @@ ASM_hsl2:
 
         movdqu [r12], xmm0
 
-        mov rdi, r12
-        lea rsi, [r13 + r14]
-        call hslTOrgb
+        ; COSO2
+
+        ; CALCULO DE C
+                                ; XMM0 =       l       |       s       |       h       |       a
+        pshufd xmm1, xmm0, 0xFF ; XMM1 =       l       |       l       |       l       |       l
+        mulps xmm1, [cte_2]     ; XMM1 =      2*l      |      2*l      |      2*l      |      2*l
+        subps xmm1, [cte_1]     ; XMM1 =     2*l-1     |     2*l-1     |     2*l-1     |     2*l-1
+        andps xmm1, [masc_abs]  ; XMM1 =  fabs(2*l-1)  |  fabs(2*l-1)  |  fabs(2*l-1)  |  fabs(2*l-1)
+        movdqa xmm2, [cte_1]    ; XMM2 =       1       |       1       |       1       |       1
+        subps xmm2, xmm1        ; XMM1 =   1-(2*l-1)   |   1-(2*l-1)   |   1-(2*l-1)   |   1-(2*l-1)
+        pshufd xmm1, xmm0, 0xAA ; XMM2 =       s       |       s       |       s       |       s
+        mulps xmm1, xmm2        ; XMM1 = (1-(2*l-1))*s | (1-(2*l-1))*s | (1-(2*l-1))*s | (1-(2*l-1))*s
+        pslldq xmm1, 12         ; XMM1 =       c       |       0       |       0       |       0
+        psrldq xmm1, 12         ; XMM1 =       0       |       0       |       0       |       c
+
+        ; CALCULO DE X
+        movdqa xmm2, [cte_1]    ; XMM2 =             1
+        pshufd xmm3, xmm0, 0x55 ; XMM3 =             h
+        divps xmm3, [cte_60]    ; XMM3 =            h/60
+        movdqu xmm4, xmm3       ; XMM4 =            XMM3
+        movdqu xmm6, [cte_2]    ; XMM5 =             2
+        cmpps xmm6, xmm3, 1     ; XMM5 =         (2 < h/60)
+        divps xmm4, [cte_2]     ; XMM4 =          (h/60)/2
+        roundps xmm5, xmm4, 0x03; XMM5 =         floor(XMM4)
+        mulps xmm5, [cte_2]     ; XMM5 =        floor(XMM4)*2
+        subps xmm3, xmm5        ; XMM3 =        fmod(h/60, 2)
+        ;andps xmm6, xmm3
+        movdqu xmm6, xmm3
+        subps xmm6, [cte_1]     ; XMM3 =       fmod(h/60, 2)-1
+        andps xmm6, [masc_abs]  ; XMM4 =    fabs(fmod(h/60, 2)-1)
+        subps xmm2, xmm6        ; XMM5 =   1-fabs(fmod(h/60, 2)-1)
+        mulps xmm2, xmm1        ; XMM5 = c*(1-fabs(fmod(h/60, 2)-1))
+        pslldq xmm2, 12
+        psrldq xmm2, 12
+                                ; XMM2 =             x
+
+        ; CALCULO DE M
+        pshufd xmm3, xmm0, 0xFF ; XMM3 =   l   |   l   |   l   |   l   |
+        pshufd xmm4, xmm1, 0x00 ; XMM4 =   c   |   c   |   c   |   c   |
+        divps xmm4, [cte_2]     ; XMM4 =  c/2  |  c/2  |  c/2  |  c/2  |
+        subps xmm3, xmm4        ; XMM3 = l-c/2 | l-c/2 | l-c/2 | l-c/2 |
+
+        ; CALCULO LAS MASCARAS
+        pshufd xmm9, xmm0, 0x55 ; XMM3 = h
+        ;movdqa xmm9, [temp]
+        movdqu xmm10, [cte_cmp1]
+        movdqu xmm11, [cte_cmp2]
+        cmpps xmm10, xmm9, 2
+        cmpps xmm11, xmm9, 2
+        andnps xmm10, xmm11
+        movdqu xmm12, [cte_cmp3]
+        movdqu xmm13, [cte_cmp4]
+        cmpps xmm12, xmm9, 2
+        cmpps xmm13, xmm9, 2
+        andnps xmm12, xmm13
+
+        pshufd xmm4, xmm12, 0x55 ;  0   <= h < 60
+        pshufd xmm5, xmm12, 0x00 ; 60   <= h < 120
+        pshufd xmm6, xmm10, 0xFF ; 120  <= h < 180
+        pshufd xmm7, xmm10, 0xAA ; 180  <= h < 240
+        pshufd xmm8, xmm10, 0x55 ; 240  <= h < 300
+        pshufd xmm9, xmm10, 0x00 ; 300  <= h < 360
+
+                           ;         b | g | r | a
+        movdqu xmm10, xmm2 ; XMM10 = 0 | 0 | 0 | x
+        pslldq xmm10, 4    ; XMM10 = 0 | 0 | x | 0
+        orps xmm10, xmm1   ; XMM10 = 0 | 0 | x | c
+        pslldq xmm10, 4    ; XMM10 = 0 | x | c | 0
+        
+        movdqu xmm11, xmm1 ; XMM11 = 0 | 0 | 0 | c
+        pslldq xmm11, 4    ; XMM11 = 0 | 0 | c | 0
+        orps xmm11, xmm2   ; XMM11 = 0 | 0 | c | x
+        pslldq xmm11, 4    ; XMM11 = 0 | c | x | 0
+        
+        movdqu xmm12, xmm2 ; XMM12 = 0 | 0 | 0 | c
+        pslldq xmm12, 4    ; XMM12 = 0 | 0 | c | 0
+        orps xmm12, xmm1   ; XMM12 = 0 | 0 | c | x
+        pslldq xmm12, 8    ; XMM12 = c | x | 0 | 0
+        
+        movdqu xmm13, xmm1 ; XMM13 = 0 | 0 | 0 | x
+        pslldq xmm13, 4    ; XMM13 = 0 | 0 | x | 0
+        orps xmm13, xmm2   ; XMM13 = 0 | 0 | x | c
+        pslldq xmm13, 8    ; XMM13 = x | c | 0 | 0
+
+        movdqu xmm14, xmm1 ; XMM14 = 0 | 0 | 0 | c
+        pslldq xmm14, 8    ; XMM14 = 0 | c | 0 | 0
+        orps xmm14, xmm2   ; XMM14 = 0 | c | 0 | x
+        pslldq xmm14, 4    ; XMM14 = c | 0 | x | 0
+
+        movdqu xmm15, xmm2 ; XMM15 = 0 | 0 | 0 | x
+        pslldq xmm15, 8    ; XMM15 = 0 | x | 0 | 0
+        orps xmm15, xmm1   ; XMM15 = 0 | x | 0 | c
+        pslldq xmm15, 4    ; XMM15 = x | 0 | c | 0
+        
+        andps xmm4, xmm10
+        andps xmm5, xmm11
+        andps xmm6, xmm12
+        andps xmm7, xmm13
+        andps xmm8, xmm14
+        andps xmm9, xmm15
+
+        addps xmm4, xmm5
+        addps xmm4, xmm6
+        addps xmm4, xmm7
+        addps xmm4, xmm8
+        addps xmm4, xmm9    ; XMM4 = b' | g' | r' | 0
+
+        addps xmm4, xmm3            ; XMM4 =    b'+m    |    g'+m    |    r'+m    | -
+        mulps xmm4, [cte_255_4]     ; XMM4 = (b'+m)*255 | (g'+m)*255 | (r'+m)*255 | -
+        movdqa xmm5, [limpiar_lsb]  ;
+        andnps xmm5, xmm4           ; XMM5 = (b'+m)*255 | (g'+m)*255 | (r'+m)*255 | 0
+        andps xmm0, [limpiar_lsb]   ; XMM0 =      0     |      0     |      0     | a
+        orps xmm0, xmm5             ; XMM0 = (b'+m)*255 | (g'+m)*255 | (r'+m)*255 | a
+        cvtps2dq xmm0, xmm0
+        packusdw xmm0, xmm0
+        packuswb xmm0, xmm0
+        pand xmm0, [limpiar_lsb]
+
+        movd [r13 + r14], xmm0
+
+
+
+
+        ; FIN COSO
+          ;mov rdi, r12
+          ;lea rsi, [r13 + r14]
+         ; call hslTOrgb
         add r14, 4
         jmp .ciclo
 
