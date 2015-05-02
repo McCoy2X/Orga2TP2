@@ -12,7 +12,7 @@ section .data
 
 dosk: DW 7283, 7283, 7283, 7283, 7283, 7283, 7283, 7283 ; 7283 = (int)((2^16 / 9) + 1)
 
-floor: DD 0x7F80
+round: DD 0x7F80
 
 ; void ASM_blur1( uint32_t w, uint32_t h, uint8_t* data )
 ; EDI w, ESI h, RDX *data
@@ -20,14 +20,16 @@ section .text
 
 global ASM_blur1
 ASM_blur1:
-	LDMXCSR [floor]
-
 	PUSH RBP
 	MOV  RBP, RSP
+	PUSH RBX
 	PUSH R12
 	PUSH R13
 	PUSH R14
 	PUSH R15
+	SUB  RSP, 8
+
+	LDMXCSR [round]
 
 	; Guardo w, h y *data
 	MOV  R13, RDX
@@ -71,67 +73,63 @@ ASM_blur1:
 	ADD R8, R14	; Posiciono *data en la segunda fila 
 	.cicloy:
 
-		MOV R10, R8
+		MOV R10, R8 ; Guardo el R8 anterior
 		ADD R8, R14 ; Avanzo una fila
 		MOV RDI, 0 ; Iterador en x
 
 		.ciclox:
 			; Clear XMM15 to unpack with ceroes
 			PXOR      XMM15, XMM15
-			PXOR      XMM14, XMM14
-			PXOR      XMM13, XMM13
 			; Tomo los 9 pixeles de memoria
-			MOVDQU    XMM1, [R12 + RDI]	; XMM1 = x | p2 | p1 | p0
-			MOVDQU    XMM2, XMM1		; XMM2 = XMM1
-			PUNPCKLBW XMM1, XMM15		; XMM1 = p1 | p0
-			PUNPCKHBW XMM2, XMM15		; XMM2 = xx | p2
+			MOVDQU    XMM0, [R12 + RDI]		; XMM0 = x | p2 | p1 | p0
+			MOVDQU    XMM1, XMM0			; XMM1 = XMM0
+			PUNPCKLBW XMM0, XMM15			; XMM0 = p1 | p0
+			PUNPCKHBW XMM1, XMM15			; XMM1 = xx | p2
 
-			MOVDQU    XMM3, [R13 + RDI]	; XMM3 = x | p5 | p4 | p3
-			MOVDQU    XMM4, XMM3		; XMM4 = XMM3
-			PUNPCKLBW XMM3, XMM15		; XMM3 = p4 | p3
-			PUNPCKHBW XMM4, XMM15		; XMM4 = xx | p5
+			MOVDQU    XMM2, [R13 + RDI]		; XMM2 = x | p5 | p4 | p3
+			MOVDQU    XMM3, XMM2			; XMM3 = XMM2
+			PUNPCKLBW XMM2, XMM15			; XMM2 = p4 | p3
+			PUNPCKHBW XMM3, XMM15			; XMM3 = xx | p5
 
-			MOVDQU    XMM5, [R8  + RDI - 4]	; XMM5 = p8 | p7 | p6 | x
-			PSRLDQ    XMM5, 4				; XMM5 = x | p8 | p7 | p6
-			MOVDQU    XMM6, XMM5			; XMM6 = XMM5
-			PUNPCKLBW XMM5, XMM15			; XMM5 = p7 | p6
-			PUNPCKHBW XMM6, XMM15			; XMM6 = xx | p8
+			MOVDQU    XMM4, [R8  + RDI - 4]	; XMM4 = p8 | p7 | p6 | x
+			PSRLDQ    XMM4, 4				; XMM4 = x | p8 | p7 | p6
+			MOVDQU    XMM5, XMM4			; XMM5 = XMM4
+			PUNPCKLBW XMM4, XMM15			; XMM4 = p7 | p6
+			PUNPCKHBW XMM5, XMM15			; XMM5 = xx | p8
 
 			; Sumo los 9 pixeles
-			PADDUSW   XMM15, XMM1		; XMM15 = p1 | p0
-			PADDUSW   XMM14, XMM2       ; XMM14 = xx | p2
-			PADDUSW   XMM15, XMM3		; XMM15 = p1 + p4 | p0 + p3
-			PADDUSW   XMM14, XMM4       ; XMM14 = xx | p2 + p5
-			PADDUSW   XMM15, XMM5		; XMM15 = p1 + p4 + p7 | p0 + p3 + p6
-			PADDUSW   XMM14, XMM6       ; XMM14 = xx | p2 + p5 + p8
-			MOVDQU    XMM13, XMM15		; XMM14 = XMM15
+			MOVDQU    XMM15, XMM0		; XMM15 = p1 | p0
+			MOVDQU    XMM14, XMM1       ; XMM14 = xx | p2
+			PADDUSW   XMM15, XMM2		; XMM15 = p1 + p4 | p0 + p3
+			PADDUSW   XMM14, XMM3       ; XMM14 = xx | p2 + p5
+			PADDUSW   XMM15, XMM4		; XMM15 = p1 + p4 + p7 | p0 + p3 + p6
+			PADDUSW   XMM14, XMM5       ; XMM14 = xx | p2 + p5 + p8
+			MOVDQU    XMM13, XMM15		; XMM13 = XMM15
+			PSRLDQ    XMM13, 8			; XMM13 = xx | p1 + p4 + p7
 			PADDUSW   XMM15, XMM14		; XMM15 = p1 + p4 + p7 | p0 + p2 + p3 + p5 + p6 + p8
-			PSRLDQ    XMM13, 8			; XMM14 = xx | p1 + p4 + p7
 			PADDUSW   XMM15, XMM13      ; XMM15 = xx | p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8
 
 			; Divido por 9
-			; Guardo dosk para division
 			MOVDQU    XMM14, XMM15		; XMM14 = XMM15
 			PMULHW    XMM15, XMM12		; High of psum * dosk
 			PMULLW    XMM14, XMM12		; Low of psum * dosk
 			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
 			PSRLD     XMM14, 16			; XMM14 >> 16
-			PXOR      XMM15, XMM15		; XMM15 = 0
-			PACKUSDW  XMM14, XMM15		; 
-			PACKUSWB  XMM14, XMM15		; 
+			PACKUSDW  XMM14, XMM15		; XMM14 = psum
+			PACKUSWB  XMM14, XMM15		; XMM14 = psum
 
 			MOVD DWORD [R10 + RDI + 4], XMM14	; Escribo en memoria (Imagen)
 
 			; Me muevo y checkeo si llegue al final de la linea
 			ADD RDI, 4
-			MOV R11, R14
-			SUB R11, 8
-			CMP RDI, R11	; Veo si llegue al final
+			MOV RSI, R14
+			SUB RSI, 8
+			CMP RDI, RSI	; Veo si llegue al final
 			JL  .ciclox
 
 		; Recorro y copio las 2 filas de pixeles siguientes
 		MOV RDI, 0 		; Iterador
-		MOV RSI, R8 	; Puntero a segunda fila
+		MOV RSI, R8 	; Puntero a fila inferior
 		.cicloxget:
 			MOV EDX, [R13 + RDI]
 			MOV [R12 + RDI], EDX
@@ -151,10 +149,12 @@ ASM_blur1:
 	MOV RDI, R13
 	CALL free
 
+	ADD  RSP, 8
 	POP  R15
 	POP  R14
 	POP  R13
 	POP  R12
+	POP  RBX
 	POP  RBP
 
 	RET

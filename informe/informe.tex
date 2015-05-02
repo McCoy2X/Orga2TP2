@@ -1,0 +1,93 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[paper=a4paper, hmargin=1.5cm, bottom=1.5cm, top=3.5cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage{xcolor}
+\usepackage{listingsutf8}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\usepackage{algpseudocode}
+\usepackage{ifthen}
+\usepackage{enumitem}
+
+\usepackage[pdftex]{graphicx}
+\usepackage{tikz}
+
+\usepackage{epstopdf}
+\usepackage[framemethod=tikz]{mdframed}
+
+% set the default code style
+\lstset{
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{green}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red} % string color
+}
+
+\author{}
+\title{Organización del Computador II \\ TP2}
+\begin{document}
+
+%% cover page
+
+\maketitle
+
+\bigskip
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l l l|}
+\hline
+Integrante       & \multicolumn{1}{c}{LU}     & Correo electrónico        \\ \hline
+Federico Beuter & 827/13                      & federicobeuter@gmail.com \\
+Juan Rinaudo & 864/13                      & jangamesdev@gmail.com \\ 
+Mauro Cherubini & 835/13                      & cheru.mf@gmail.com \\ \hline
+\end{tabular}
+\end{table}
+
+\vfill
+
+\begin{center}
+\textbf{Reservado para la cátedra}
+\end{center}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+Instancia       & Docente & Nota \\ \hline
+Primera entrega &         &      \\ \hline
+Segunda entrega &         &      \\ \hline
+\end{tabular}
+\end{table}
+
+\pagebreak
+
+\tableofcontents
+
+% end cover page
+
+\pagebreak
+
+\input{introduccion}
+
+\input{filtroBlur}
+\newpage
+
+\input{filtroMerge}
+\newpage
+
+\input{filtroHSL}
+\newpage
+
+\end{document}

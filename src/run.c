@@ -6,6 +6,7 @@
 /* ************************************************************************* */
 
 #include "run.h"
+#include "rdtsc.h"
 
 int run_blur(int c, char* src, char* dst){
   BMP* bmp = bmp_read(src);
@@ -24,10 +25,15 @@ int run_blur(int c, char* src, char* dst){
     dataC = data;
   }
   
+  unsigned long start, end;
+  RDTSC_START(start);
   if(c==0)         C_blur(w,h,dataC);
   else if(c==1) ASM_blur1(w,h,dataC);
   else if(c==2) ASM_blur2(w,h,dataC);
   else {return -1;}
+  RDTSC_STOP(end);
+  unsigned long delta = end - start;
+  printf("%ld", delta);
   
   if(*(bmp_get_bitcount(bmp)) == 24) {
     to24(w,h,dataC,data);
@@ -66,10 +72,15 @@ int run_merge(int c, char* src1, char* src2, char* dst, float value){
     data2C = data2;
   }
   
+  unsigned long start, end;
+  RDTSC_START(start);
   if(c==0)         C_merge(w1,h1,data1C,data2C,value);
   else if(c==1) ASM_merge1(w1,h1,data1C,data2C,value);
   else if(c==2) ASM_merge2(w1,h1,data1C,data2C,value);
   else {return -1;}
+  RDTSC_STOP(end);
+  unsigned long delta = end - start;
+  printf("%ld", delta);
   
   if(*(bmp_get_bitcount(bmp1)) == 24) {
     to24(w1,h1,data1C,data1);
@@ -100,10 +111,15 @@ int run_hsl(int c, char* src, char* dst, float hh, float ss, float ll) {
     dataC = data;
   }
   
+  unsigned long start, end;
+  RDTSC_START(start);
   if(c==0)         C_hsl(w,h,dataC,hh,ss,ll);
   else if(c==1) ASM_hsl1(w,h,dataC,hh,ss,ll);
   else if(c==2) ASM_hsl2(w,h,dataC,hh,ss,ll);
   else {return -1;}
+  RDTSC_STOP(end);
+  unsigned long delta = end - start;
+  printf("%ld", delta);
   
   if(*(bmp_get_bitcount(bmp)) == 24) {
     to24(w,h,dataC,data);

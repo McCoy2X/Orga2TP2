@@ -18,6 +18,7 @@ global ASM_merge2
 ASM_merge2:
 	PUSH RBP
 	MOV  RBP, RSP
+	PUSH RBX
 	PUSH R12
 
 	; Calculo fila en bytes
@@ -115,5 +116,6 @@ ASM_merge2:
 	JL  .cicloy
 
 	POP  R12
+	POP  RBX
 	POP  RBP
 	RET

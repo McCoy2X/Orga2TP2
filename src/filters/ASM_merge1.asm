@@ -9,18 +9,15 @@ section .data
 
 ones: DD 1.0, 1.0, 1.0, 1.0
 
-;floor: DD 0x7F80
-
 ; void ASM_merge1(uint32_t w, uint32_t h, uint8_t* data1, uint8_t* data2, float value)
 ; EDI w, ESI, h, RDX *data1, RCX *data2, XMM0 value
 section .text
 
 global ASM_merge1
 ASM_merge1:
-	;LDMXCSR [floor]
-
 	PUSH RBP
 	MOV  RBP, RSP
+	PUSH RBX
 	PUSH R12
 
 	; Calculo fila en bytes
@@ -81,6 +78,7 @@ ASM_merge1:
 	JL  .cicloy
 
 	POP  R12
+	POP  RBX
 	POP  RBP
 	RET
 

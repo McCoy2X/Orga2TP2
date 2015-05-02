@@ -12,7 +12,7 @@ section .data
 
 dosk: DW 7283, 7283, 7283, 7283, 7283, 7283, 7283, 7283 ; 7283 = (int)((2^16 / 9) + 1)
 
-floor: DD 0x7F80
+round: DD 0x7F80
 
 ; void ASM_blur2( uint32_t w, uint32_t h, uint8_t* data )
 ; EDI w, ESI h, RDX *data
@@ -20,14 +20,16 @@ section .text
 
 global ASM_blur2
 ASM_blur2:
-	LDMXCSR [floor]
-
 	PUSH RBP
 	MOV  RBP, RSP
+	PUSH RBX
 	PUSH R12
 	PUSH R13
 	PUSH R14
 	PUSH R15
+	SUB  RSP, 8
+
+	LDMXCSR [round]
 
 	; Guardo w, h y *data
 	MOV  R13, RDX
@@ -299,10 +301,12 @@ ASM_blur2:
 	MOV RDI, R13
 	CALL free
 
+	ADD  RSP, 8
 	POP  R15
 	POP  R14
 	POP  R13
 	POP  R12
+	POP  RBX
 	POP  RBP
 
 	RET
