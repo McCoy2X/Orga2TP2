@@ -86,7 +86,7 @@ ASM_hsl2:
         mov rdi, 16
         call malloc
         mov r12, rax
-        mov r14d, 29192
+        mov r14d, 0
 
         .ciclo:
         cmp r14d, ebx
