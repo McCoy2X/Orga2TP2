@@ -133,6 +133,22 @@ Comparo el iterador con la cantidad de pixeles en una fila y repito hasta que ll
 Al final del ciclo hago las copias, incremento el iterador de filas y checkeo si llegue al final. \\
 
 \subsection{Resultados}
+La primera experimentacion que hicimos es correr las 3 implementaciones (C compilada con optimizaciones de nivel 3) con la imagen de lena en diferentes tamaños (multiplos de 16x16, hasta 320x320), corrimos 10 test con cada tamaño y luego promediamos los valores para reducir la cantidad de ruido. \\
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.5]{images/blur_comp}
+\end{figure}
+
+Este grafico nos muestra que el codigo de ASM2 pareceria ser el mas rapido. Antes de confirmar esto queremos ver que no haya ningun tipo de factor que beneficie a ASM2. \\
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.28]{images/c_blur_lena}
+	\includegraphics[scale=0.28]{images/asm1_blur_lena}
+	\includegraphics[scale=0.28]{images/asm2_blur_lena}
+\end{figure}
+
+Tanto en el codigo de C como en el ASM1 y ASM2 no poseen ningun salto condicional que dependa de 
 
 \subsection{Conclusion}

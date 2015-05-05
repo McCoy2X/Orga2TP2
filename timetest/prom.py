@@ -8,7 +8,9 @@ class Data:
 	sum = 0
 	count = 0
 
-files = ["cblur.csv", "asm1blur.csv", "asm2blur.csv", "cmerge.csv", "asm1merge.csv", "asm2merge.csv"]
+files = ["c.blur.lena.csv", "asm1.blur.lena.csv", "asm2.blur.lena.csv", 
+"c.blur.colors.csv", "asm1.blur.colors.csv", "asm2.blur.colors.csv", 
+"c.merge.lena.csv", "asm1.merge.lena.csv", "asm2.merge.lena.csv"]
 
 for f in files:
 	dataList = []
