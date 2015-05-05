@@ -7,7 +7,7 @@
 
 all: makes tp2
 
-CFLAGS=-Wall -Wextra -pedantic -O0 -ggdb -lm -std=c99
+CFLAGS=-Wall -Wextra -pedantic -O3 -ggdb -lm -std=c99
 
 makes:
 	make -C bmp

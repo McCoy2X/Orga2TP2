@@ -1,5 +1,7 @@
-import matplotlib
 import csv
+import matplotlib.pyplot as plt
+
+files = ["cblur.csv", "asm1blur.csv", "asm2blur.csv", "cmerge.csv", "asm1merge.csv", "asm2merge.csv"]
 
 class Data:
 	n = ""
@@ -7,37 +9,40 @@ class Data:
 	min = float("inf")
 	max = 0
 	sum = 0
-	count = 0
-
-files = ["cblur.csv", "asm1blur.csv", "asm2blur.csv", "cmerge.csv", "asm1merge.csv", "asm2merge.csv"]
 
 for f in files:
-	dataList = []
-	with open(f, "rb") as csvfile:
+	dataN = []
+	dataAvg = []
+	with open("prom/" + f, "rb") as csvfile:
 		reader = csv.reader(csvfile, delimiter=",")
-		lastn = 0
 		d = Data()
 		for row in reader:
 			if(row[0] != "N"):
-				n = int(row[0])
-				clock = int(row[2])
+				d = row[1].split("x")
+				pixels = int(d[0]) * int(d[1])
+				dataN.append(pixels)
+				dataAvg.append(row[5])
+	plot1 = plt.plot(dataN, dataAvg, 'r-')
+	plt.savefig("graph/"+ f +".pdf")
+	plt.clf()
 
-				if(lastn != n):
-					dataList.append(d);
-					d = Data()
+filesGroup = [["cblur.csv", "asm1blur.csv", "asm2blur.csv"], ["cmerge.csv", "asm1merge.csv", "asm2merge.csv"]]
 
-				d.n = row[0]
-				d.size = row[1]
-				d.min = min(d.min, clock)
-				d.max = max(d.max, clock)
-				d.sum += clock
-				d.count += 1
-
-				lastn = n
-		dataList.append(d);
-
-	with open("data/" + f, 'wb') as csvfile:
-	    writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-	    writer.writerow(["N"] + ["Size"] + ["Min"] + ["Max"] + ["Sum"] + ["Average"]);
-	    for data in dataList:
-	    	writer.writerow([data.n] + [data.size] + [data.min] + [data.max] + [data.sum] + [data.sum / data.count])
+for fg in filesGroup:
+	for f in fg:
+		dataN = []
+		dataAvg = []
+		with open("prom/" + f, "rb") as csvfile:
+			reader = csv.reader(csvfile, delimiter=",")
+			d = Data()
+			for row in reader:
+				if(row[0] != "N"):
+					d = row[1].split("x")
+					pixels = int(d[0]) * int(d[1])
+					dataN.append(pixels)
+					dataAvg.append(row[5])
+		plot1 = plt.plot(dataN, dataAvg, label=f.split(".")[0])
+		plt.legend(bbox_to_anchor=(0.02, 0.78, 1., .102), loc=3, ncol=1, borderaxespad=0.)
+	
+	plt.savefig("graph/comb"+ f +".pdf")
+	plt.clf()

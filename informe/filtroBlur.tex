@@ -23,15 +23,17 @@ R10 es un puntero a la fila actual de la imagen (fila que estoy modificando) \\
 	\includegraphics[scale=0.5]{images/BlurASM1_0}
 \end{figure}
 
+Antes de comenzar el ciclo incicializo R9 en 2 y posiciono el puntero a la imagen en la segunda fila de pixeles.
+
 Al principio de cada ciclo de y muevo R8 a R10, aumento R8 en una fila y inicializo el iterador en x (RDI) en 0.
 
-Luego empiezo a iterar en x. Muevo a los registros los 3 grupos de pixeles.\\
-XMM0 = [R12 + RDI] = xx ; p2 ; p1 ; p0 \\
-XMM1 = [R13 + RDI] = xx ; p5 ; p4 ; p3 \\
-XMM2 = [R8  + RDI] = xx ; p8 ; p7 ; p6 \\
+Muevo a los registros los 3 grupos de pixeles. \\
+	XMM0 = [R12 + RDI] = xx ; p2 ; p1 ; p0 \\
+	XMM1 = [R13 + RDI] = xx ; p5 ; p4 ; p3 \\
+	XMM2 = [R8  + RDI] = xx ; p8 ; p7 ; p6 \\
 \\
 Despues desenpaqueto los pixeles de byte a word para poder sumar los 9 pixeles sin saturacion, hacemos una copia de cada uno para poder desenpaquetar la parte inferior en un registro y la superior en otro (XMM1 = XMM0, XMM3 = XMM2, XMM5 = XMM4) y ademas llenamos un registro (XMM15) con ceros para expandir los componentes con ceros.
-Una vez desenpaquetados nos quedan los registros con los siguientes valores. \\
+Una vez desenpaquetados nos quedan los registros con los siguientes valores.
 \\
 	XMM0 = p1 ; p0 \\
  	XMM1 = xx ; p2 \\
@@ -63,6 +65,11 @@ La implementacion 2 nos pide trabajar de a 4 pixeles por iteracion.
 
 Para eso voy a calcular primero los pixeles P0 y P1, y despues el P2 y P3 tratando de minimizar la cantidad de accesos a memoria. \\
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.5]{images/BlurASM2_1}
+\end{figure}
+
 Para hacer los calculos vamos a tomar 6 set de 4 pixeles que nos permiten sumar en un solo registro 2 pixeles al mismo tiempo usando solo sumas, cada set ira adentro de un registro XMM. Ademas se necesitan 6 registros XMM mas para poder desenpaquetar los bytes a words y asi no tener saturacion. \\
 
 Al igual que la implementacion uno necesitaremos los mismos 6 registros de proposito general. \\
@@ -71,3 +78,61 @@ Al igual que la implementacion uno necesitaremos los mismos 6 registros de propo
 	\centering
 	\includegraphics[scale=0.5]{images/BlurASM2_0}
 \end{figure}
+
+Antes de comenzar el ciclo iniciamos el iterador en y (R9) y posicionamos el puntero a la imagen en la segunda fila de pixeles. \\
+
+Al igual que en la primera implementacion nos guardamos una copia del puntero a la fila que vamos a incrementar y movemos R8 a la siguiente fila de pixeles. Ademas inicializamos el iterador de X (RDI) en 0. \\
+
+Muevo a los registros los 6 pixeles. \\
+	XMM0 = p3 ; p2 ; p1 ; p0 \\
+	XMM2 = p4 ; p3 ; p2 ; p1 \\
+	XMM4 = p9 ; p8 ; p7 ; p6 \\
+	XMM6 = p10 ; p9 ; p8 ; p7 \\
+	XMM8 = p15 ; p14 ; p13 ; p12 \\
+	XMM10 = p16 ; p15 ; p14 ; p13 \\
+\\
+Al igual que en la implementacion uno desenpaquetamos los registros haciendo una copia y desenpaquetando la parte superior en el registro original y la inferior en la copia. Para desenpaquetar uso un registro con ceros (XMM15) \\
+	XMM0 = p1 ; p0 \\
+ 	XMM1 = p3 ; p2 \\
+ 	XMM2 = p2 ; p1 \\
+	XMM3 = p4 ; p3 \\ 
+	XMM4 = p7 ; p6 \\
+	XMM5 = p9 ; p8 \\
+	XMM6 = p8 ; p7 \\
+ 	XMM7 = p10 ; p9 \\
+ 	XMM8 = p13 ; p12 \\
+	XMM9 = p15 ; p14 \\ 
+	XMM10 = p14 ; p13 \\
+	XMM11 = p16 ; p15 \\
+\\
+Ahora sumo los registros XMM0, XMM1, XMM2, XMM4, XMM5, XMM6, XMM8, XMM9, XMM10 uno por uno con XMM15, al terminar XMM15 = p1 + p2 + p3 + p7 + p8 + p9 + p13 + p14 + p15 ; p0 + p1 + p2 + p6 + p7 + p8 + p12 + p13 + p14, esto como se ve en la imagen es igual a P1 | P0. \\
+
+Ahora hago la division de cada pixel igual que en la primera implementacion, antes de dividir me guardo una copia de XMM15 en XMM0, divido por 9 y luego shifteo 8 bytes a la derecha y divido nuevamente. \\
+
+Luego muevo los pixeles procesados P0 y P1 a memoria, posicionandolos con el offset correcto. \\
+
+Ahora para procesar los pixeles P2 y P3 muevo 3 grupos mas de pixeles de la memoria a los registros XMM0, XMM4 y XMM8. \\
+	XMM0 = p5 ; p4 ; p3 ; p2 \\
+	XMM4 = p11 ; p10 ; p9 ; p8 \\
+	XMM8 = p17 ; p16 ; p15 ; p14 \\
+\\
+Ademas hago copias en XMM1, XMM5 y XMM9 y desenpaqueto de byte a word. \\
+	XMM0 = p3 ; p2 \\
+ 	XMM1 = p5 ; p4 \\
+	XMM4 = p9 ; p8 \\
+	XMM5 = p11 ; p10 \\
+ 	XMM8 = p15 ; p14 \\
+	XMM9 = p17 ; p16 \\
+\\
+Nuevamente sumo los registros XMM0, XMM1, XMM3, XMM4, XMM5, XMM7, XMM8, XMM9, XMM11 uno por uno con XMM15, XMM15 = p3 + p4 + p5 + p9 + p10 + p11 + p15 + p16 + p17 ; p2 + p3 + p4 + p8 + p9 + p10 + p14 + p15 + p16, esto es P3 | P2. \\
+
+Hago la division al igual que arriba y guardo los pixeles procesados P2 y P3 en memoria. \\
+
+Comparo el iterador con la cantidad de pixeles en una fila y repito hasta que llegue hasta los ultimos 16 bytes de la fila, en los ultimos 16 bytes me fijo de cargarlos en memoria en solo 3 registros XMM y procesarlos al igual que la primera parte del ciclo para asegurarme de no pasarme. \\
+
+Al final del ciclo hago las copias, incremento el iterador de filas y checkeo si llegue al final. \\
+
+\subsection{Resultados}
+
+
+\subsection{Conclusion}

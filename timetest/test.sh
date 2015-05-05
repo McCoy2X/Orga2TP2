@@ -19,7 +19,7 @@ function RUNBLUR {
 
 			`echo "convert ${2} -resize ${s} conv.bmp"`
 
-			ftime=`./tp2 ${1} blur conv.bmp out.bmp`
+			ftime=`../bin/tp2 ${1} blur conv.bmp out.bmp`
 
 			echo "${n}, ${s}, ${ftime}, 0" >> "${1}blur.csv"
 		done
@@ -45,7 +45,7 @@ function RUNMERGE {
 				`echo "convert ${2} -resize ${s} conv.bmp"`
 				`echo "convert ${3} -resize ${s} conv2.bmp"`
 
-				ftime=`./tp2 ${1} merge conv.bmp conv2.bmp out.bmp ${v}`
+				ftime=`../bin/tp2 ${1} merge conv.bmp conv2.bmp out.bmp ${v}`
 
 				echo "${n}, ${s}, ${ftime}, ${v}" >> "${1}merge.csv"
 			done
@@ -54,19 +54,33 @@ function RUNMERGE {
 	done
 }
 
-sizes=(16x16 32x32 64x64 128x128 256x256 512x512 1024x1024 2048x2048)
+#sizes=(16x16 32x32 64x64 128x128 256x256 512x512 1024x1024 2048x2048)
+#sizes=(16x16 32x32 48x48 64x64 96x96 128x128 192x192 256x256 384x384 512x512)
+count=1
+
+sizes=(16x16)
+for i in `seq 1 100`
+do
+	val=$(($i * 16))
+	sizes+=("${val}x${val}")
+done
+
 CLEAR c blur
 CLEAR asm1 blur
 CLEAR asm2 blur
-RUNBLUR c lena.bmp 100
-RUNBLUR asm1 lena.bmp 100
-RUNBLUR asm2 lena.bmp 100
+RUNBLUR c lena.bmp $count
+RUNBLUR asm1 lena.bmp $count
+RUNBLUR asm2 lena.bmp $count
 
-sizes=(16x16 32x32 64x64 128x128 256x256 512x512 1024x1024 2048x2048)
 values=(0.5)
 CLEAR c merge
 CLEAR asm1 merge
 CLEAR asm2 merge
-RUNMERGE c lena.bmp colores.bmp 100
-RUNMERGE asm1 lena.bmp colores.bmp 100
-RUNMERGE asm2 lena.bmp colores.bmp 100
+RUNMERGE c lena.bmp colores.bmp $count
+RUNMERGE asm1 lena.bmp colores.bmp $count
+RUNMERGE asm2 lena.bmp colores.bmp $count
+
+echo "Python: Saco el promedio de los valores"
+`python prom.py`
+echo "Python: Grafico las funciones"
+`python graph.py`
