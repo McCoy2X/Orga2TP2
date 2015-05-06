@@ -8,16 +8,20 @@ class Data:
 	sum = 0
 	count = 0
 
-files = ["data/c.blur.lena.csv", "data/asm1.blur.lena.csv", "data/asm2.blur.lena.csv", 
-"data/c.blur.colores.csv", "data/asm1.blur.colores.csv", "data/asm2.blur.colores.csv", 
-"data/c.blur.rojo.csv", "data/asm1.blur.rojo.csv", "data/asm2.blur.rojo.csv", 
-"data/c.blur.verde.csv", "data/asm1.blur.verde.csv", "data/asm2.blur.verde.csv", 
-"data/c.blur.azul.csv", "data/asm1.blur.azul.csv", "data/asm2.blur.azul.csv", 
-"data/c.merge.lena.csv", "data/asm1.merge.lena.csv", "data/asm2.merge.lena.csv"]
+files = ["c.blur.lena", "asm1.blur.lena", "asm2.blur.lena", 
+"c.blur.colores", "asm1.blur.colores", "asm2.blur.colores", 
+"c.blur.rojo", "asm1.blur.rojo", "asm2.blur.rojo", 
+"c.blur.verde", "asm1.blur.verde", "asm2.blur.verde", 
+"c.blur.azul", "asm1.blur.azul", "asm2.blur.azul", 
+"c.merge.lena", "asm1.merge.lena", "asm2.merge.lena", 
+"c.merge.colores", "asm1.merge.colores", "asm2.merge.colores", 
+"c.merge.rojo", "asm1.merge.rojo", "asm2.merge.rojo", 
+"c.merge.verde", "asm1.merge.verde", "asm2.merge.verde", 
+"c.merge.azul", "asm1.merge.azul", "asm2.merge.azul"]
 
 for f in files:
 	dataList = []
-	with open(f, "rb") as csvfile:
+	with open("data/" + f + ".csv", "rb") as csvfile:
 		reader = csv.reader(csvfile, delimiter=",")
 		lastn = 0
 		d = Data()
@@ -40,7 +44,7 @@ for f in files:
 				lastn = n
 		dataList.append(d);
 
-	with open("prom/" + f.split("/")[1], 'wb') as csvfile:
+	with open("prom/" + f + ".csv", 'wb') as csvfile:
 	    writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 	    writer.writerow(["N"] + ["Size"] + ["Min"] + ["Max"] + ["Sum"] + ["Average"]);
 	    for data in dataList:

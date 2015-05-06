@@ -96,6 +96,30 @@ Para terminar solo necesito sumarlos y moverlos a memoria. Esto se puede hacer c
 Luego al igual que en la primera implementacion checkeo si llegue al final sino itero en x nuevamenete y hago lo mismo con y.
 
 \subsection{Resultados}
+Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) con la imagen de lena brindada por la catedra (multiplos de 16x16, hasta 320x320), se corren 100 veces cada tamaño y despues se saca un promedio y se grafica el maximo, el minimo y el promedio.
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.45]{images/c_merge}
+	\includegraphics[scale=0.45]{images/asm1_merge}
+	\includegraphics[scale=0.45]{images/asm2_merge}
+\end{figure}
+
+Tambien graficamos los 3 promedios en un grafico para ver cual de ellos es el mas rapido en general. Y para ver mejor la diferencia entre ASM1 y ASM2 los graficamos aparte.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.5]{images/c_asm1_asm2_merge_comp}
+	\includegraphics[scale=0.5]{images/asm1_asm2_merge_comp}
+\end{figure}
+
+Tambien queremos ver que la imagen no modifique el tiempo de ejecucion, tanto el codigo de C com el de ASM no poseen ningun salto condicional que depende de el valor de los pixeles.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.45]{images/c_merge_lena_colors}
+	\includegraphics[scale=0.45]{images/asm1_merge_lena_colors}
+	\includegraphics[scale=0.45]{images/asm2_merge_lena_colors}
+\end{figure}
 
 \subsection{Conclusion}

@@ -67,7 +67,7 @@ for fg in filesGroup:
 					d = row[1].split("x")
 					pixels = int(d[0]) * int(d[1])
 					dataN.append(pixels)
-					dataAvg.append(row[2])
+					dataAvg.append(row[5])
 
 		sub.plot(dataN, dataAvg, label=f.split(".")[0].upper())
 		name += f.split(".")[0] + "_"
@@ -80,7 +80,10 @@ for fg in filesGroup:
 
 filesGroup = [["c.blur.lena.csv", "c.blur.colores.csv", "c.blur.rojo.csv", "c.blur.verde.csv", "c.blur.azul.csv"], 
 ["asm1.blur.lena.csv", "asm1.blur.colores.csv", "asm1.blur.rojo.csv", "asm1.blur.verde.csv", "asm1.blur.azul.csv"], 
-["asm2.blur.lena.csv", "asm2.blur.colores.csv", "asm2.blur.rojo.csv", "asm2.blur.verde.csv", "asm2.blur.azul.csv"]]
+["asm2.blur.lena.csv", "asm2.blur.colores.csv", "asm2.blur.rojo.csv", "asm2.blur.verde.csv", "asm2.blur.azul.csv"], 
+["c.merge.lena.csv", "c.merge.colores.csv", "c.merge.rojo.csv", "c.merge.verde.csv", "c.merge.azul.csv"], 
+["asm1.merge.lena.csv", "asm1.merge.colores.csv", "asm1.merge.rojo.csv", "asm1.merge.verde.csv", "asm1.merge.azul.csv"], 
+["asm2.merge.lena.csv", "asm2.merge.colores.csv", "asm2.merge.rojo.csv", "asm2.merge.verde.csv", "asm2.merge.azul.csv"]]
 
 for fg in filesGroup:
 	fig = figure(figsize=(5,5))

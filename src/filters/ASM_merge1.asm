@@ -49,19 +49,20 @@ ASM_merge1:
 
 			; Los sumo
 			CALL      addPixels
-			MOVDQU    XMM4, XMM0		; XMM4 = p0 * v + p0' * (1-v)
+			PEXTRD    EAX, XMM0, 0x00	; EAX = p0 * v + p0' * (1-v)
+			PINSRD    XMM4, EAX, 0x00	; XMM4 = p0 * v + p0' * (1-v)
 			CALL      addPixels
-			MOVDQU    XMM5, XMM0		; XMM5 = p1 * v + p1' * (1-v)
+			PEXTRD    EAX, XMM0, 0x00	; EAX = p0 * v + p0' * (1-v)
+			PINSRD    XMM4, EAX, 0x01	; XMM4 = p0 * v + p0' * (1-v)
 			CALL      addPixels
-			MOVDQU    XMM6, XMM0		; XMM5 = p2 * v + p2' * (1-v)
+			PEXTRD    EAX, XMM0, 0x00	; EAX = p0 * v + p0' * (1-v)
+			PINSRD    XMM4, EAX, 0x02	; XMM4 = p0 * v + p0' * (1-v)
 			CALL      addPixels
-			MOVDQU    XMM7, XMM0		; XMM5 = p3 * v + p3' * (1-v)
+			PEXTRD    EAX, XMM0, 0x00	; EAX = p0 * v + p0' * (1-v)
+			PINSRD    XMM4, EAX, 0x03	; XMM4 = p0 * v + p0' * (1-v)
 
 			; Los copio en *data1
-			MOVD DWORD [RDX + R8], XMM4			; p0
-			MOVD DWORD [RDX + R8 + 4], XMM5		; p1
-			MOVD DWORD [RDX + R8 + 8], XMM6		; p2
-			MOVD DWORD [RDX + R8 + 12], XMM7	; p3
+			MOVDQU [RDX + R8], XMM4			; p0 | p1 | p2 | p3
 
 		ADD R8, 16	; Me muevo al siguiente grupo de pixeles
 		CMP R8, RDI	; Veo si llegue al final de la fila
