@@ -3,7 +3,7 @@
 \subsection{Explicacion}
 El filtro de blur se aplica en cada pixel de la imagen exceptuando los del borde, para eso tomamos el pixel a modificar y los 8 adyacentes y los promediamos para obtener el valor final del pixel.
 
-Debemos tener cuidado a la hora de procesar la imagen de no pisar los datos y operar con los pixeles de la imagen original a la hora de hacer las cuentas.
+Debemos tener cuidado a la hora de procesar la imagen de no pisar los datos y operar con los pixeles de la imagen original.
 
 \subsection{Implementacion 1}
 La primera implementacion nos pide que trabajemos de a 1 pixel por iteracion.
@@ -133,22 +133,37 @@ Comparo el iterador con la cantidad de pixeles en una fila y repito hasta que ll
 Al final del ciclo hago las copias, incremento el iterador de filas y checkeo si llegue al final. \\
 
 \subsection{Resultados}
-La primera experimentacion que hicimos es correr las 3 implementaciones (C compilada con optimizaciones de nivel 3) con la imagen de lena en diferentes tamaños (multiplos de 16x16, hasta 320x320), corrimos 10 test con cada tamaño y luego promediamos los valores para reducir la cantidad de ruido. \\
+% La primera experimentacion que hicimos es correr las 3 implementaciones (C compilada con optimizaciones de nivel 3) con la imagen de lena en diferentes tamaños (multiplos de 16x16, hasta 320x320), corrimos 10 test con cada tamaño y luego promediamos los valores para reducir la cantidad de ruido. \\
+Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) con las imagenes brindadas por la catedra (multiplos de 16x16, hasta 320x320), se corren 100 veces cada tamaño y despues se saca un promedio y se grafica el maximo, el minimo y el promedio
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[scale=0.5]{images/blur_comp}
+	\includegraphics[scale=0.45]{images/c_blur}
+	\includegraphics[scale=0.45]{images/asm1_blur}
+	\includegraphics[scale=0.45]{images/asm2_blur}
 \end{figure}
 
-Este grafico nos muestra que el codigo de ASM2 pareceria ser el mas rapido. Antes de confirmar esto queremos ver que no haya ningun tipo de factor que beneficie a ASM2. \\
+Ahora graficamos los 3 valores promedios de blur para ver cual de ellos es el mas rapido en general. Para ver mejor la diferencia entre ASM1 y ASM2 los graficamos aparte.
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[scale=0.28]{images/c_blur_lena}
-	\includegraphics[scale=0.28]{images/asm1_blur_lena}
-	\includegraphics[scale=0.28]{images/asm2_blur_lena}
+	\includegraphics[scale=0.5]{images/c_asm1_asm2_blur_comp}
+	\includegraphics[scale=0.5]{images/asm1_asm2_blur_comp}
 \end{figure}
 
-Tanto en el codigo de C como en el ASM1 y ASM2 no poseen ningun salto condicional que dependa de 
+Este grafico nos muestra que el codigo de ASM2 pareceria ser el mas rapido. Antes de confirmar esto queremos ver que no haya ningun tipo de factor en la imagen que influya en el tiempo de ejecucion que no sea el tamaño. \\
+
+Tanto en el codigo de C como en el ASM1 y ASM2 no poseen ninguna operacion que dependa de los pixeles a procesar, para probar que esto es realmente asi en la practica decidimos correr los test al igual que al principio pero esta vez usando la imagen de lena, colores y 3 imagenes mas completamente rojas, azules y verdes.\\
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.45]{images/c_blur_lena_colors}
+	\includegraphics[scale=0.45]{images/asm1_blur_lena_colors}
+	\includegraphics[scale=0.45]{images/asm2_blur_lena_colors}
+\end{figure}
 
 \subsection{Conclusion}
+Luego de la experimentacion podemos concluir que ASM2 es el mas rapido en general. \\
+
+La imagen a procesar no afecta en nada el tiempo de ejecucion y el tamaño lo afecta solo por que se deben procesar mas pixeles. \\
+

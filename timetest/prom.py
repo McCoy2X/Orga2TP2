@@ -8,9 +8,12 @@ class Data:
 	sum = 0
 	count = 0
 
-files = ["c.blur.lena.csv", "asm1.blur.lena.csv", "asm2.blur.lena.csv", 
-"c.blur.colors.csv", "asm1.blur.colors.csv", "asm2.blur.colors.csv", 
-"c.merge.lena.csv", "asm1.merge.lena.csv", "asm2.merge.lena.csv"]
+files = ["data/c.blur.lena.csv", "data/asm1.blur.lena.csv", "data/asm2.blur.lena.csv", 
+"data/c.blur.colores.csv", "data/asm1.blur.colores.csv", "data/asm2.blur.colores.csv", 
+"data/c.blur.rojo.csv", "data/asm1.blur.rojo.csv", "data/asm2.blur.rojo.csv", 
+"data/c.blur.verde.csv", "data/asm1.blur.verde.csv", "data/asm2.blur.verde.csv", 
+"data/c.blur.azul.csv", "data/asm1.blur.azul.csv", "data/asm2.blur.azul.csv", 
+"data/c.merge.lena.csv", "data/asm1.merge.lena.csv", "data/asm2.merge.lena.csv"]
 
 for f in files:
 	dataList = []
@@ -37,7 +40,7 @@ for f in files:
 				lastn = n
 		dataList.append(d);
 
-	with open("prom/" + f, 'wb') as csvfile:
+	with open("prom/" + f.split("/")[1], 'wb') as csvfile:
 	    writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 	    writer.writerow(["N"] + ["Size"] + ["Min"] + ["Max"] + ["Sum"] + ["Average"]);
 	    for data in dataList:

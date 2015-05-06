@@ -14,8 +14,8 @@
    viewBox="0 0 744.09448819 1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="BlurASM2_1.pdf"
+   inkscape:version="0.91 r"
+   sodipodi:docname="BlurASM2_1.svg"
    inkscape:export-filename="/home/jangames/Desktop/orga2tp2/informe/images/BlurASM1_0"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
@@ -28,8 +28,8 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8284271"
-     inkscape:cx="396.54972"
+     inkscape:zoom="1.83"
+     inkscape:cx="408.74953"
      inkscape:cy="502.99235"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -37,10 +37,10 @@
      inkscape:snap-center="true"
      inkscape:snap-object-midpoints="true"
      inkscape:object-nodes="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1018"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-width="1366"
+     inkscape:window-height="691"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
      inkscape:window-maximized="1">
     <inkscape:grid
        type="xygrid"
@@ -54,7 +54,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -68,11 +68,11 @@
        height="48.698479"
        width="48.698479"
        id="rect3359-33"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3361-4"
        width="48.698479"
        height="48.698479"
@@ -81,7 +81,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3363-7"
        width="48.698479"
        height="48.698479"
@@ -95,11 +95,11 @@
        height="48.698479"
        width="48.698479"
        id="rect3359-5"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3361-7"
        width="48.698479"
        height="48.698479"
@@ -108,7 +108,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3363-6"
        width="48.698479"
        height="48.698479"
@@ -122,7 +122,7 @@
        height="48.698479"
        width="48.698479"
        id="rect3359"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
@@ -131,11 +131,11 @@
        height="48.698479"
        width="48.698479"
        id="rect3365"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#00ff00;fill-opacity:0.39215686"
+       style="fill:#00ff00;fill-opacity:0.39215686;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect4263-4-6"
        width="200"
        height="50"
@@ -149,7 +149,7 @@
        height="48.698479"
        width="48.698479"
        id="rect3371"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
@@ -158,7 +158,7 @@
        height="48.698479"
        width="48.698479"
        id="rect3377"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
@@ -167,11 +167,11 @@
        height="48.698479"
        width="48.698479"
        id="rect3383"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3361"
        width="48.698479"
        height="48.698479"
@@ -180,7 +180,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3367"
        width="48.698479"
        height="48.698479"
@@ -189,7 +189,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3379"
        width="48.698479"
        height="48.698479"
@@ -198,7 +198,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3385"
        width="48.698479"
        height="48.698479"
@@ -207,7 +207,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3363"
        width="48.698479"
        height="48.698479"
@@ -216,7 +216,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#00ff00;fill-opacity:0.39215686"
+       style="fill:#00ff00;fill-opacity:0.39215686;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect4263-4"
        width="200"
        height="50"
@@ -225,7 +225,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3369"
        width="48.698479"
        height="48.698479"
@@ -234,7 +234,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3375"
        width="48.698479"
        height="48.698479"
@@ -243,7 +243,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3381"
        width="48.698479"
        height="48.698479"
@@ -252,7 +252,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3387"
        width="48.698479"
        height="48.698479"
@@ -261,7 +261,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#0000ff;fill-opacity:0.39215687"
+       style="fill:#0000ff;fill-opacity:0.39215687;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect4265"
        width="200"
        height="50"
@@ -283,7 +283,7 @@
          x="319.63196"
          y="468.84351">P0</tspan></text>
     <rect
-       style="fill:#ff0000;fill-opacity:0.39215686"
+       style="fill:#ff0000;fill-opacity:0.39215686;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3461-6"
        width="200"
        height="50"
@@ -292,7 +292,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ff0000;fill-opacity:0.39215686"
+       style="fill:#ff0000;fill-opacity:0.39215686;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3461-6-7"
        width="200"
        height="50"
@@ -301,7 +301,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ff0000;fill-opacity:0.39215686"
+       style="fill:#ff0000;fill-opacity:0.39215686;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3461-6-5"
        width="200"
        height="50"
@@ -310,7 +310,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#0000ff;fill-opacity:0.39215686"
+       style="fill:#0000ff;fill-opacity:0.39215686;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect4265-8"
        width="200"
        height="50"
@@ -319,7 +319,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#0000ff;fill-opacity:0.39215686"
+       style="fill:#0000ff;fill-opacity:0.39215686;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect4265-1"
        width="200"
        height="50"
@@ -328,7 +328,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#00ff00;fill-opacity:0.39215686"
+       style="fill:#00ff00;fill-opacity:0.39215686;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect4263-4-6-5"
        width="200"
        height="50"
@@ -342,11 +342,11 @@
        height="48.698479"
        width="48.698479"
        id="rect3359-2"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3361-6"
        width="48.698479"
        height="48.698479"
@@ -355,7 +355,7 @@
        inkscape:export-xdpi="100"
        inkscape:export-ydpi="100" />
     <rect
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.30152166px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect3363-5"
        width="48.698479"
        height="48.698479"
@@ -403,34 +403,34 @@
          x="479.59229"
          y="678.83557">P3</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:4.00000008000000040;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 265,482.36218 300,0 0,150 -300,0 z"
        id="path4151"
        inkscape:connector-curvature="0"
        transform="translate(-4.9229925e-6,0)" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:4.00000008;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:4.00000008,4.00000008;stroke-dashoffset:0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:3,3;stroke-dashoffset:0"
        d="m 415,482.36218 0,150"
        id="path4153"
        inkscape:connector-curvature="0"
        transform="translate(-4.9229925e-6,0)" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:4.00000016, 4.00000016;stroke-dashoffset:0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3,3;stroke-dashoffset:0"
        d="m 465,482.36219 0,150"
        id="path4153-0"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:4.00000016, 4.00000016;stroke-dashoffset:0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3,3;stroke-dashoffset:0"
        d="m 515.00001,482.36219 0,150"
        id="path4153-9"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:4.00000016, 4.00000016;stroke-dashoffset:0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3,3;stroke-dashoffset:0"
        d="m 365,482.36219 0,150"
        id="path4153-4"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:4.00000016, 4.00000016;stroke-dashoffset:0"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3,3;stroke-dashoffset:0"
        d="m 315,482.36219 0,150"
        id="path4153-8"
        inkscape:connector-curvature="0" />
@@ -460,7 +460,7 @@
        sodipodi:nodetypes="cccc" />
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="276.42969"
        y="513.60242"
        id="text4267-4"
@@ -473,7 +473,7 @@
          y="513.60242">p0</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="328.05859"
        y="513.60242"
        id="text4267-4-5"
@@ -486,7 +486,7 @@
          y="513.60242">p1</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="376.48828"
        y="513.60242"
        id="text4267-4-5-7"
@@ -499,7 +499,7 @@
          y="513.60242">p2</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="426.40039"
        y="513.60242"
        id="text4267-4-5-1"
@@ -512,7 +512,7 @@
          y="513.60242">p3</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="476.43555"
        y="513.56726"
        id="text4267-4-5-2"
@@ -525,7 +525,7 @@
          y="513.56726">p4</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="526.33594"
        y="513.45007"
        id="text4267-4-5-6"
@@ -538,7 +538,7 @@
          y="513.45007">p5</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="276.40625"
        y="563.60242"
        id="text4267-4-2"
@@ -551,7 +551,7 @@
          y="563.60242">p6</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="326.40039"
        y="563.45593"
        id="text4267-4-5-22"
@@ -564,7 +564,7 @@
          y="563.45593">p7</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="376.38281"
        y="563.60242"
        id="text4267-4-5-7-8"
@@ -577,7 +577,7 @@
          y="563.60242">p8</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="426.38281"
        y="563.60242"
        id="text4267-4-5-1-7"
@@ -590,7 +590,7 @@
          y="563.60242">p9</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="469.75"
        y="563.60242"
        id="text4267-4-5-2-1"
@@ -603,7 +603,7 @@
          y="563.60242">p10</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="521.37891"
        y="563.60242"
        id="text4267-4-5-6-9"
@@ -616,7 +616,7 @@
          y="563.60242">p11</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="269.80859"
        y="613.60242"
        id="text4267-4-7"
@@ -629,7 +629,7 @@
          y="613.60242">p12</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="319.7207"
        y="613.60242"
        id="text4267-4-5-5"
@@ -642,7 +642,7 @@
          y="613.60242">p13</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="369.75586"
        y="613.60242"
        id="text4267-4-5-7-3"
@@ -655,7 +655,7 @@
          y="613.60242">p14</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="419.65625"
        y="613.60242"
        id="text4267-4-5-1-2"
@@ -668,7 +668,7 @@
          y="613.60242">p15</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="469.72656"
        y="613.60242"
        id="text4267-4-5-2-3"
@@ -681,7 +681,7 @@
          y="613.60242">p16</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
        x="519.7207"
        y="613.60242"
        id="text4267-4-5-6-1"

@@ -17,8 +17,6 @@ global ASM_merge1
 ASM_merge1:
 	PUSH RBP
 	MOV  RBP, RSP
-	PUSH RBX
-	PUSH R12
 
 	; Calculo fila en bytes
 	MOV  R8, RDX	; Guardo momentaneamente RDX
@@ -27,26 +25,25 @@ ASM_merge1:
 	MOV  RDI, RAX	; RDI = RAX
 	MOV  RDX, R8	; Restauro RDX
 
+	; 0 para el unpack
+	PXOR      XMM10, XMM10
+
 	; Calculo los floats para multiplicar luego
-	PXOR      XMM10, XMM10				; 0 para el unpack
 	MOVDQU    XMM15, XMM0				; XMM15 = x | x | x | v
 	SHUFPS    XMM15, XMM15, 0x00		; Shuffle float con mascara 8'b00000000	XMM15 = v | v | v | v
 	MOVDQU    XMM14, [ones]				; XMM14 = 1.0 | 1.0 | 1.0 | 1.0
 	SUBPS     XMM14, XMM15				; XMM14 = 1.0 - v | 1.0 - v | 1.0 - v | 1.0 - v
 
 	; Ciclo de mergeo
-	MOV  R11, 0			; Iterador en y bytes
-	MOV  R12, 0			; Iterador en y
+	MOV  R9, 0		; Iterador en y
 	.cicloy:
 
 		MOV  R8, 0	; R8 iterador de x
 
 		.ciclox:
 			; Pido los pixeles (4 de cada imagen)
-			LEA       R10, [RDX + R11]	; Tomo posicion memoria pixeles *data1
-			MOVDQU    XMM0, [R10 + R8]	; XMM0 = p3 | p2 | p1 | p0
-			LEA       R10, [RCX + R11]	; Tomo posicion memoria pixeles *data2
-			MOVDQU    XMM1, [R10 + R8]	; XMM1 = p3' | p2' | p1' | p0'
+			MOVDQU    XMM0, [RDX + R8]	; XMM0 = p3 | p2 | p1 | p0
+			MOVDQU    XMM1, [RCX + R8]	; XMM1 = p3' | p2' | p1' | p0'
 			MOVDQU    XMM2, XMM0
 			MOVDQU    XMM3, XMM1
 
@@ -61,24 +58,21 @@ ASM_merge1:
 			MOVDQU    XMM7, XMM0		; XMM5 = p3 * v + p3' * (1-v)
 
 			; Los copio en *data1
-			LEA        R10, [RDX + R11]			; Cargo la posicion de meoria
-			MOVD DWORD [R10 + R8], XMM4			; p0
-			MOVD DWORD [R10 + R8 + 4], XMM5		; p1
-			MOVD DWORD [R10 + R8 + 8], XMM6		; p2
-			MOVD DWORD [R10 + R8 + 12], XMM7	; p3
+			MOVD DWORD [RDX + R8], XMM4			; p0
+			MOVD DWORD [RDX + R8 + 4], XMM5		; p1
+			MOVD DWORD [RDX + R8 + 8], XMM6		; p2
+			MOVD DWORD [RDX + R8 + 12], XMM7	; p3
 
 		ADD R8, 16	; Me muevo al siguiente grupo de pixeles
 		CMP R8, RDI	; Veo si llegue al final de la fila
 		JL .ciclox
 
-	.endx:
-	ADD  R11, RDI	; Muevo R11 a la siguiente fila
-	INC  R12		; Incremento R12
-	CMP  R12, RSI	; Veo si llegue al final de todo
+	ADD  RDX, RDI	; Muevo RDX a la siguiente fila
+	ADD  RCX, RDI	; Muevo RCX a la siguiente fila
+	INC  R9		; Incremento R9
+	CMP  R9, RSI	; Veo si llegue al final de todo
 	JL  .cicloy
 
-	POP  R12
-	POP  RBX
 	POP  RBP
 	RET
 
