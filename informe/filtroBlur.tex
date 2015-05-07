@@ -5,9 +5,9 @@
 El filtro $blur$ consiste en para cada pixel (exceptuando los ubicados en el borde), tomar sus 8 vecinos y hacer un promedio para las componente \texttt{R}, \texttt{G} y \texttt{B} entre los 9 pixeles, este nuevo valor reemplaza los que teniamos en el pixel original. El promedio debe ser calculado respecto a los datos originales, es decir, que si al procesar un pixel y alguno de los vecinos ya fue procesado, debemos utilizar los datos del mismo antes de se procesado. Como referencia la catedra proveyo la implementacion del mismo en $C$.
 
 \subsection{Implementacion 1}
-La primera implementacion nos pide que trabajemos de a 1 pixel por iteracion.
+La primera implementacion nos pedia que trabajemos de a 1 pixel por iteracion.
 
-Los pixeles estan compuestos por 4 bytes: A R G B, esto nos permite cargar 4 pixeles en un registro \texttt{XMM}, como nosotros necesitamos 9 pixeles, ubicados de a 3 en 3 filas diferentes vamos a precisar 3 registros XMM para cargarlos (Para esto usamos los registros XMM0, XMM2 y XMM4). Ademas s utilizaron los siguientes 6 registro de proposito general: \\
+Los pixeles estan compuestos por 4 bytes: A R G B, esto nos permite cargar 4 pixeles en un registro \texttt{XMM}, como nosotros necesitamos 9 pixeles, ubicados de a 3 en 3 filas diferentes vamos a precisar 3 registros XMM para cargarlos (Para esto usamos los registros \texttt{XMM0}, \texttt{XMM2} y \texttt{XMM4}). Ademas s utilizaron los siguientes 6 registro de proposito general: \\
 
 \noindent
 \texttt{RDI} que lo usamos para iterar sobre el eje \texttt{X} \\
@@ -26,120 +26,127 @@ Esto se puede visualizar en el siguiente grafico:
 
 Donde \texttt{P} es el pixel a procesar.
 
-Antes de comenzar el ciclo incicializo \texttt{R9} en 2 y posiciono el puntero a la imagen en memoria en la segunda fila de pixeles.
+Antes de comenzar el ciclo incicializamos \texttt{R9} en 2 y posicionamos el puntero a la imagen en memoria en la segunda fila de pixeles.
 
-Al principio de cada ciclo de \texttt{Y} muevo \texttt{R8} a \texttt{R10}, aumento \texttt{R8} en una fila e inicializo el iterador en \texttt{X} (ubicado en RDI) en 0.
-
-Muevo a los registros los 3 grupos de pixeles. \\
+Al principio de cada ciclo de \texttt{Y} movimos \texttt{R8} a \texttt{R10}, aumentamos \texttt{R8} en una fila e inicializamos el iterador en \texttt{X} (ubicado en RDI) en 0. Asi quedan los registros de los 3 grupos de pixeles:\\
 
 \noindent
-\texttt{XMM0 = [R12 + RDI] = xx $\vert$ p2 $\vert$ p1 $\vert$ p0}\\
-\texttt{XMM1 = [R13 + RDI] = xx $\vert$ p5 $\vert$ p4 $\vert$ p3}\\
-\texttt{XMM2 = $\ $[R8  + RDI] = xx $\vert$ p8 $\vert$ p7 $\vert$ p6}\\
+\texttt{XMM0 $\gets$ [R12 + RDI] = - $\vert$ p2 $\vert$ p1 $\vert$ p0}\\
+\texttt{XMM1 $\gets$ [R13 + RDI] = - $\vert$ p5 $\vert$ p4 $\vert$ p3}\\
+\texttt{XMM2 $\gets$ $\ $[R8  + RDI] = - $\vert$ p8 $\vert$ p7 $\vert$ p6}\\
 
-Despues desempaquetamos los pixeles de $byte$ a $word$ para poder sumar los 9 pixeles sin saturacion, hacemos una copia de cada uno para poder desenpaquetar la parte inferior en un registro y la superior en otro (XMM1 = XMM0, XMM3 = XMM2, XMM5 = XMM4) y ademas llenamos un registro (XMM15) con ceros para expandir cada una de las componentes sin alterar el numero original.
-Una vez desempaquetados nos quedan los registros con los siguientes valores.\\
+Despues desempaquetamos los pixeles de $byte$ a $word$ para poder sumar los 9 pixeles sin saturacion, hicimos una copia de cada uno para poder desempaquetar la parte inferior en un registro y la superior en otro (\texttt{XMM1 = XMM0}, \texttt{XMM3 = XMM2}, \texttt{XMM5 = XMM4}) y ademas llenamos un registro (\texttt{XMM15}) con ceros para expandir cada una de las componentes sin alterar el numero original.
+Una vez desempaquetados nos quedan los registros con los siguientes valores:\\
 
 \noindent
-\texttt{XMM0 = p1 $\vert$ p0} \\
-\texttt{XMM1 = xx $\vert$ p2} \\
-\texttt{XMM2 = p4 $\vert$ p3} \\
-\texttt{XMM3 = xx $\vert$ p5} \\ 
-\texttt{XMM4 = p7 $\vert$ p6} \\
-\texttt{XMM5 = xx $\vert$ p8} \\
+\texttt{XMM0 $\gets$ p1 $\vert$ p0} \\
+\texttt{XMM1 $\gets$ - $\ \vert$ p2} \\
+\texttt{XMM2 $\gets$ p4 $\vert$ p3} \\
+\texttt{XMM3 $\gets$ - $\ \vert$ p5} \\ 
+\texttt{XMM4 $\gets$ p7 $\vert$ p6} \\
+\texttt{XMM5 $\gets$ - $\ \vert$ p8} \\
 \\
-Ahora sumamos los registros y luego hacemos la division. \\
-Sumando XMM0, XMM2 y XMM3 en XMM15 \\
-	XMM15 = p1 + p4 + p7 ; p0 + p3 + p6	\\
-Sumando XMM1, XMM3 y XMM4 en XMM14	\\
-	XMM14 = x ; p2 + p5 + p8 \\
-Ahora hago una copia de XMM15 en XMM13 y la shifteo 8 bytes a la derecha \\
-	XMM13 = x ; p1 + p4 + p7 \\
-Por ultimo sumo XMM15, XMM14 y XMM13 en XMM15 \\
-	XMM15 x ; p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 \\
+Luego sumamos los registros e hicimos la division. \\
 
-Para hacer la division optamos por multiplicar por $(2^{16} / 9) + 1$ y luego shiftear 16 bits a la derecha cada componente. Para eso tengo el valor por el cual voy a multiplicar en memoria precalculado, al principio del programa decido guardarlo en XMM12.
-Hago una copia de XMM15 en XMM14 y multiplico por XMM12 guardandome la parte superior de la mutiplicacion en XMM15 y la inferior en XMM14. Luego empaqueto los dos valores juntos como doubleword y los guardo en XMM14 y shifteo a 16 a la derecha.
-Por ultimo empaqueto los valores obtenidos como words y luego como bytes y los guardo en la posicion de memoria del pixel actual.
+Sumando \texttt{XMM0}, \texttt{XMM2} y \texttt{XMM3} en \texttt{XMM15}: \\
+	\texttt{XMM15 $\gets$ p1 + p4 + p7 $\vert$ p0 + p3 + p6}	\\
 
-Aumento en 4 el iterador en x y comparo con el tamaño en bytes de una linea de pixeles, si es menor itero nuevamente en x.
+Sumando \texttt{XMM1}, \texttt{XMM3} y \texttt{XMM4} en \texttt{XMM14}	\\
+	\texttt{XMM14 $\gets$ - $\vert$ p2 + p5 + p8} \\
 
-Si es mayor o igual voy a hacer 2 copias de las lineas de pixeles siguientes (Que necesito para operar la siguiente fila).
+Luego hicimos una copia de \texttt{XMM15} en \texttt{XMM13} y la shifteamos 8 bytes a la derecha \\
+	\texttt{XMM13 $\gets$ - $\vert$ p1 + p4 + p7} \\
+
+Por ultimo sumamos \texttt{XMM15}, \texttt{XMM14} y \texttt{XMM13} en \texttt{XMM15} \\
+	\texttt{XMM15 $\gets$ - $\vert$ p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8} \\
+
+Para hacer la division optamos por multiplicar por $(2^{16} / 9) + 1$ y luego shiftear 16 bits a la derecha cada componente. Para eso tengo el valor por el cual voy a multiplicar en memoria precalculado, al principio del programa decidimos guardarlo en \texttt{XMM12}.
+Luego, hicimos una copia de \texttt{XMM15} en \texttt{XMM14} y multiplicamos por \texttt{XMM12} guardando la parte superior de la mutiplicacion en \texttt{XMM15} y la inferior en \texttt{XMM14}. Luego empaquetamos los dos valores juntos como doubleword y los guardamos en \texttt{XMM14} y shifteamos 16 bits a la derecha.
+Por ultimo empaquetamos los valores obtenidos a words y luego a bytes, posteriorment los guardamos en la posicion de memoria del pixel actual.
+
+Aumentamos en 4 el iterador en \texttt{X} y comparamos con el tamaño en bytes de una linea de pixeles, si es menor iteramos nuevamente en \texttt{X}. En caso de que fuese mayor o igual, hicimos 2 copias de las lineas de pixeles siguientes (las cuales eran necesarias para poder operar la siguiente fila).
 
 \subsection{Implementacion 2}
-La implementacion 2 nos pide trabajar de a 4 pixeles por iteracion.
+Para la segunda implementacion se nos pidio trabajar de a 4 pixeles por iteracion.
 
-Para eso voy a calcular primero los pixeles P0 y P1, y despues el P2 y P3 tratando de minimizar la cantidad de accesos a memoria. \\
+Para eso calculamos primero los pixeles \texttt{P0} y \texttt{P1}, y despues el \texttt{P2} y \texttt{P3} tratando de minimizar la cantidad de accesos a memoria. \\
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.5]{images/BlurASM2_1}
 \end{figure}
 
-Para hacer los calculos vamos a tomar 6 set de 4 pixeles que nos permiten sumar en un solo registro 2 pixeles al mismo tiempo usando solo sumas, cada set ira adentro de un registro XMM. Ademas se necesitan 6 registros XMM mas para poder desenpaquetar los bytes a words y asi no tener saturacion. \\
+Para hacer los calculos tomamos 6 set de 4 pixeles que nos permiten sumar en un solo registro 2 pixeles al mismo tiempo usando solo sumas, cada set ira adentro de un registro \texttt{XMM}. Ademas necesitamos 6 registros \texttt{XMM} mas para poder desempaquetar los bytes a words, y asi no tener saturacion. \\
 
-Al igual que la implementacion uno necesitaremos los mismos 6 registros de proposito general. \\
+\newpage
+Al igual que la primer implementacion, necesitaremos los mismos 6 registros de proposito general. \\
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.5]{images/BlurASM2_0}
 \end{figure}
 
-Antes de comenzar el ciclo iniciamos el iterador en y (R9) y posicionamos el puntero a la imagen en la segunda fila de pixeles. \\
+Antes de comenzar el ciclo iniciamos el iterador en \texttt{Y} (\texttt{R9}) y posicionamos el puntero a la imagen en la segunda fila de pixeles. \\
 
-Al igual que en la primera implementacion nos guardamos una copia del puntero a la fila que vamos a incrementar y movemos R8 a la siguiente fila de pixeles. Ademas inicializamos el iterador de X (RDI) en 0. \\
+Al igual que en la primera implementacion nos guardamos una copia del puntero a la fila que vamos a incrementar y movemos \texttt{R8} a la siguiente fila de pixeles. Ademas inicializamos el iterador de \texttt{X} (\texttt{RDI}) en 0. Por ultimo cargamos los 6 pixeles a sus respectivos registros:\\
 
-Muevo a los registros los 6 pixeles. \\
-	XMM0 = p3 ; p2 ; p1 ; p0 \\
-	XMM2 = p4 ; p3 ; p2 ; p1 \\
-	XMM4 = p9 ; p8 ; p7 ; p6 \\
-	XMM6 = p10 ; p9 ; p8 ; p7 \\
-	XMM8 = p15 ; p14 ; p13 ; p12 \\
-	XMM10 = p16 ; p15 ; p14 ; p13 \\
-\\
-Al igual que en la implementacion uno desenpaquetamos los registros haciendo una copia y desenpaquetando la parte superior en el registro original y la inferior en la copia. Para desenpaquetar uso un registro con ceros (XMM15) \\
-	XMM0 = p1 ; p0 \\
- 	XMM1 = p3 ; p2 \\
- 	XMM2 = p2 ; p1 \\
-	XMM3 = p4 ; p3 \\ 
-	XMM4 = p7 ; p6 \\
-	XMM5 = p9 ; p8 \\
-	XMM6 = p8 ; p7 \\
- 	XMM7 = p10 ; p9 \\
- 	XMM8 = p13 ; p12 \\
-	XMM9 = p15 ; p14 \\ 
-	XMM10 = p14 ; p13 \\
-	XMM11 = p16 ; p15 \\
-\\
-Ahora sumo los registros XMM0, XMM1, XMM2, XMM4, XMM5, XMM6, XMM8, XMM9, XMM10 uno por uno con XMM15, al terminar XMM15 = p1 + p2 + p3 + p7 + p8 + p9 + p13 + p14 + p15 ; p0 + p1 + p2 + p6 + p7 + p8 + p12 + p13 + p14, esto como se ve en la imagen es igual a P1 | P0. \\
+\noindent
+\texttt{XMM0 $\ \gets$ p3 $\ \vert$ p2 $\ \vert$ p1 $\ \vert$ p0} \\
+\texttt{XMM2 $\ \gets$ p4 $\ \vert$ p3 $\ \vert$ p2 $\ \vert$ p1} \\
+\texttt{XMM4 $\ \gets$ p9 $\ \vert$ p8 $\ \vert$ p7 $\ \vert$ p6} \\
+\texttt{XMM6 $\ \gets$ p10 $\vert$ p9 $\ \vert$ p8 $\ \vert$ p7} \\
+\texttt{XMM8 $\ \gets$ p15 $\vert$ p14 $\vert$ p13 $\vert$ p12} \\
+\texttt{XMM10 $\gets$ p16 $\vert$ p15 $\vert$ p14 $\vert$ p13} \\
 
-Ahora hago la division de cada pixel igual que en la primera implementacion, antes de dividir me guardo una copia de XMM15 en XMM0, divido por 9 y luego shifteo 8 bytes a la derecha y divido nuevamente. \\
+De la misma forma que en la primer implementacion desempaquetamos los registros haciendo una copia y desempaquetando la parte superior en el registro original y la inferior en la copia. Para desenpaquetar usamos un registro con ceros (\texttt{XMM15}) \\
 
-Luego muevo los pixeles procesados P0 y P1 a memoria, posicionandolos con el offset correcto. \\
+\noindent
+\texttt{XMM0 $\ \gets$ p1 $\ \vert$ p0} \\
+\texttt{XMM1 $\ \gets$ p3 $\ \vert$ p2} \\
+\texttt{XMM2 $\ \gets$ p2 $\ \vert$ p1} \\
+\texttt{XMM3 $\ \gets$ p4 $\ \vert$ p3} \\ 
+\texttt{XMM4 $\ \gets$ p7 $\ \vert$ p6} \\
+\texttt{XMM5 $\ \gets$ p9 $\ \vert$ p8} \\
+\texttt{XMM6 $\ \gets$ p8 $\ \vert$ p7} \\
+\texttt{XMM7 $\ \gets$ p10 $\ \vert$ p9} \\
+\texttt{XMM8 $\ \gets$ p13 $\ \vert$ p12} \\
+\texttt{XMM9 $\ \gets$ p15 $\ \vert$ p14} \\ 
+\texttt{XMM10 $\gets$ p14 $\ \vert$ p13} \\
+\texttt{XMM11 $\gets$ p16 $\ \vert$ p15} \\
 
-Ahora para procesar los pixeles P2 y P3 muevo 3 grupos mas de pixeles de la memoria a los registros XMM0, XMM4 y XMM8. \\
-	XMM0 = p5 ; p4 ; p3 ; p2 \\
-	XMM4 = p11 ; p10 ; p9 ; p8 \\
-	XMM8 = p17 ; p16 ; p15 ; p14 \\
-\\
-Ademas hago copias en XMM1, XMM5 y XMM9 y desenpaqueto de byte a word. \\
-	XMM0 = p3 ; p2 \\
- 	XMM1 = p5 ; p4 \\
-	XMM4 = p9 ; p8 \\
-	XMM5 = p11 ; p10 \\
- 	XMM8 = p15 ; p14 \\
-	XMM9 = p17 ; p16 \\
-\\
-Nuevamente sumo los registros XMM0, XMM1, XMM3, XMM4, XMM5, XMM7, XMM8, XMM9, XMM11 uno por uno con XMM15, XMM15 = p3 + p4 + p5 + p9 + p10 + p11 + p15 + p16 + p17 ; p2 + p3 + p4 + p8 + p9 + p10 + p14 + p15 + p16, esto es P3 | P2. \\
+Con todos los registros cargados, procedimos a sumar cada uno de ellos con XMM15, el resutlado final fue el siguiente:\\\
 
-Hago la division al igual que arriba y guardo los pixeles procesados P2 y P3 en memoria. \\
+\noindent
+\texttt{XMM15 $\gets$ p1 + p2 + p3 + p7 + p8 + p9 + p13 + p14 + p15 $\vert$ p0 + p1 + p2 + p6 + p7 + p8 + p12 + p13 + p14}\\
 
-Comparo el iterador con la cantidad de pixeles en una fila y repito hasta que llegue hasta los ultimos 16 bytes de la fila, en los ultimos 16 bytes me fijo de cargarlos en memoria en solo 3 registros XMM y procesarlos al igual que la primera parte del ciclo para asegurarme de no pasarme. \\
+Como podemos apreciar, el mismo responde al grafico presentado anteriormente, particularmente a los pixeles \texttt{P0} y \texttt{P1}. Luego hicimos la division de cada pixel de la misma manera que en la primer implementacion, antes de dividir preservamos una copia de \texttt{XMM15} en \texttt{XMM9}, dividimos por 9, shifteamos 8 bytes y dividimos nuevamente. Finalmente movimos los pixeles procesados a \texttt{P0} y \texttt{P1} a la memoria en la posicion correcta. Despues hubo que procesar los pixeles \texttt{P2} y \texttt{P3}, para hacer esto movimos 3 grupos mas de pixeles de la memoria hacia los registros. En esta etapa tenemos:
 
-Al final del ciclo hago las copias, incremento el iterador de filas y checkeo si llegue al final. \\
+\noindent
+\texttt{XMM0 $\gets$ p5 $\ \vert$ p4 $\ \vert$ p3 $\ \vert$ p2}\\
+\texttt{XMM4 $\gets$ p11 $\vert$ p10 $\vert$ p9 $\ \vert$ p8}\\
+\texttt{XMM8 $\gets$ p17 $\vert$ p16 $\vert$ p15 $\vert$ p14}\\
+
+Luego hicimos copias en \texttt{XMM1}, \texttt{XMM5} y \texttt{XMM9} y desempaquetamos de byte a word:\\
+
+\noindent
+\texttt{XMM0 $\gets$ p3 $\ \vert$ p2}\\
+\texttt{XMM1 $\gets$ p5 $\ \vert$ p4}\\
+\texttt{XMM4 $\gets$ p9 $\ \vert$ p8}\\
+\texttt{XMM5 $\gets$ p11 $\vert$ p10}\\
+\texttt{XMM8 $\gets$ p15 $\vert$ p14}\\
+\texttt{XMM9 $\gets$ p17 $\vert$ p16}\\
+
+Nuevamente sumamos los registros de la misma forma que antes, es decir, uno a uno con \texttt{XMM15}, el resultado final es:
+
+\noindent
+\texttt{XMM15 $\gets$ p3 + p4 + p5 + p9 + p10 + p11 + p15 + p16 + p17 $\vert$ p2 + p3 + p4 + p8 + p9 + p10 + p14 + p15 + p16}
+
+Como podemos apreciar, en este caso las cuentas tambien responden a lo presentado en los graficos, en este caso a los pixeles \texttt{P2} y \texttt{P3}. De la misma forma que antes hacemos las divisiones apropiadas, y guardamos los pixeles procesdos en memoria.
+
+Una vez terminado el procesamiento de pixeles, comparamo el iterador con la cantidad de pixeles en una fila y repetimos hasta llegar hasta los ultimos 16 bytes de la fila, estos ultimos 16 bytes los cargamos en solo 3 registros \texttt{XMM} y los procesamos al igual que la primera parte del ciclo para asegurarme de no pasarnos. Al final del ciclo hacemos las copias pertinentes, incrementamos el iterador de filas y revisamos si llegamos al final. \\
 
 \subsection{Resultados}
-Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) con la imagen de lena brindada por la catedra (multiplos de 16x16, hasta 320x320), se corren 100 veces cada tamaño y despues se saca un promedio y se grafica el maximo, el minimo y el promedio.
+Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320). Cada tamaño se ejecuta 100 veces, despues se saca un promedio y se lo grafica junto con el maximo y el minimo. La metodologia adoptada para evaluar la eficacia de las implementaciones es tomar la cantidad de ciclos que tarda en correr cada una de las implementaciones, esto lo hacemos mediante la libreria \texttt{rdtsc.h}, las pruebas van a ser ejecutadas en un \texttt{Intel Core i7 4700MQ}. Estas condiciones de prueba se mantendran durante el resto del informe y para todos los filtros.
 
 \begin{figure}[h!]
 	\centering
@@ -148,7 +155,7 @@ Para la experimentacion vamos a correr las 3 implementaciones (La version de C c
 	\includegraphics[scale=0.45]{images/asm2_blur}
 \end{figure}
 
-Ahora graficamos los 3 valores promedios de blur para ver cual de ellos es el mas rapido en general. Para ver mejor la diferencia entre ASM1 y ASM2 los graficamos aparte.
+Ahora graficamos los 3 valores promedios de $blur$ para ver cual de ellos es el mas rapido en general. Para ver mejor la diferencia entre ASM1 y ASM2 los graficamos aparte.
 
 \begin{figure}[h!]
 	\centering
@@ -158,7 +165,7 @@ Ahora graficamos los 3 valores promedios de blur para ver cual de ellos es el ma
 
 Este grafico nos muestra que el codigo de ASM2 pareceria ser el mas rapido. Antes de confirmar esto queremos ver que no haya ningun tipo de factor en la imagen que influya en el tiempo de ejecucion que no sea el tamaño. \\
 
-Tanto en el codigo de C como en el ASM1 y ASM2 no poseen ninguna operacion que dependa de los pixeles a procesar, para probar que esto es realmente asi en la practica decidimos correr los test al igual que al principio pero esta vez usando la imagen de lena, colores y 3 imagenes mas completamente rojas, azules y verdes.\\
+Tanto en el codigo de C como en el ASM1 y ASM2 no poseen ninguna operacion que dependa de los pixeles a procesar, para probar que esto es realmente asi en la practica decidimos correr los test al igual que al principio pero esta vez usando la imagen de $lena$, $colores$ y 3 imagenes mas completamente rojas, azules y verdes.\\
 
 \begin{figure}[h!]
 	\centering
@@ -171,4 +178,3 @@ Tanto en el codigo de C como en el ASM1 y ASM2 no poseen ninguna operacion que d
 Luego de la experimentacion podemos concluir que ASM2 es el mas rapido en general. \\
 
 La imagen a procesar no afecta en nada el tiempo de ejecucion y el tamaño lo afecta solo por que se deben procesar mas pixeles. \\
-

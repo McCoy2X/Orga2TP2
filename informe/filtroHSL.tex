@@ -151,6 +151,39 @@ Otro problema que encontramos fue el caso \texttt{cmin == cmax}, aqui tenemos qu
 \noindent
 \texttt{XMM10  $\gets$ - $\vert$ - $\vert$ - $\vert$ h}\\
 
+\paragraph{Calculo de \texttt{l} y \texttt{s}\newline}
+
+Para el calculo de \texttt{l} no hubo ninguna particularidad, el mismo se hizo en base a los siguientes registros y constantes:\\
+
+\noindent
+\texttt{XMM7 $\ \ \ \gets\ $ cmax $\vert\ \ $ 0 $\ \ \vert\ \ $ 0 $\ \ \vert\ \ $ 0}\\
+\texttt{XMM5 $\ \ \ \gets\ $ cmin $\vert\ \ $ 0 $\ \ \vert\ \ $ 0 $\ \ \vert\ \ $ 0}\\
+\texttt{cte\char`_510  $\gets$ 510.0 $\vert$ 510.0 $\vert$ 510.0 $\vert$ 510.0}\\
+
+Primero se realizo la resta entre \texttt{XMM7} y \texttt{XMM5} almacenando el resultado en \texttt{XMM7}, a esta se la convirtio a $float$ mediante \texttt{CVTDQ2PS} previo a la multiplicacion con \texttt{cte\char`_510}. Tenemos finalmente en resultado en \texttt{XMM8}, el mismo tiene la pinta:\\
+
+\noindent
+\texttt{XMM8  $\gets$ l $\vert$ 0 $\vert$ 0 $\vert$ 0}\\
+
+Para el calculo de \texttt{s} se utilizaron los siguientes registros, mascaras y constantes:\\
+
+\noindent
+\texttt{XMM7 $\ \ \ \ \ \ \ \gets\ \ \ $ cmax $\ \ \ \vert\ $ 0 $\ \vert\ $ 0 $\ \vert\ $ 0}\\
+\texttt{XMM5 $\ \ \ \ \ \ \ \gets\ \ \ $ cmin $\ \ \ \vert\ $ 0 $\ \vert\ $ 0 $\ \vert\ $ 0}\\
+\texttt{XMM5 $\ \ \ \ \ \ \ \gets\ \ \ \ $ l $\ \ \ \ \ \vert\ $ 0 $\ \vert\ $ 0 $\ \vert\ $ 0}\\
+\texttt{cte\char`_1  $\ \ \ \ \ \ \gets\ \ \ $ 1.0 $\ \ \ \ \vert$ 1.0 $\vert$ 1.0 $\vert$ 1.0}\\
+\texttt{cte\char`_2  $\ \ \ \ \ \ \gets\ \ \ $ 2.0 $\ \ \ \ \vert$ 2.0 $\vert$ 2.0 $\vert$ 2.0}\\
+\texttt{cte\char`_255  $\ \ \ \ \gets\ $ 255.0001 $\ \vert\ $ 0 $\ \vert\ $ 0 $\ \vert\ $ 0}\\
+\texttt{masc\char`_abs  $\ \ \ \gets$ 0x7FFFFFFF $\vert\ $ 0 $\ \vert\ $ 0 $\ \vert\ $ 0}\\
+\texttt{limpiar\char`_msb  $\gets$ 0xFFFFFFFF $\vert\ $ 0 $\ \vert\ $ 0 $\ \vert\ $ 0}\\
+
+En este caso hay dos puntos a destacar, estos son el condicional de $s(r,g,b)$ y el \texttt{fabs}. Para poder filtrar segun si \texttt{cmax == cmin} alcanza con hacer una comparacion de igualdad entre \texttt{cmax} y \texttt{cmin} mediante \texttt{PCMPEQD}, guardar el resultado de la misma en un registro, y luego de hacer las operaciones correspondientes aplicar el resultado de la comparacion mediante un \texttt{AND}. En el caso del \texttt{fabs}, al estar operando con numeros de tipo $float$ codificados bajo la norma IEEE 754, basta con colocar el bit mas significativo en cero, esto lo podemos hacer mediante un \texttt{AND} con el numero al cual deseamos aplicar \texttt{fabs} y la \texttt{masc\char`_abs}. Finalmente tenemos en el registro \texttt{XMM7}:\\
+
+\noindent
+\texttt{XMM7 $\gets$ s $\vert$ 0 $\vert$ 0 $\vert$ 0}\\
+
+Con los valores de \texttt{h}, \texttt{s} y \texttt{l} calculados, lo unico que falta por hacer es juntar todo en un solo registro junto con el dato del canal $alpha$, el cual se encuentra en el registro \texttt{XMM0}. Para hacer esto, vamos a shiftear los registros que contienen a \texttt{s} y a \texttt{h}, 4 y 8 bytes hacia la derecha respectivamente. Una vez que tenemos esto, lo vamos a juntar a todos en un unico registro mediante un \texttt{OR} y vamos a procede a aplicarle a \texttt{XMM0} la mascara \texttt{limpiar\char`_msb}, convertir el resultado a $float$ y juntarlo junto con lo que ya teniamos utilizando nuevamente un \texttt{OR}. Con esto podemos concluir la etapa $RGBtoHSL$.
+
 \subsubsection{HSL a RGB}
 
 Tanto como en el caso de $suma$ y $RGBtoHSL$, la catedra proveyo las ecuaciones necesarias para la conversion, las mismas son:\\
@@ -251,7 +284,6 @@ Para el calculo de $RGBAux$, se tuvieron que armar seis mascaras, las mismas fil
 
 La idea consistio en comparar si \texttt{XMM9} $<$ cte\texttt{\char`_cmp1} y \texttt{XMM9} $\geq$ \texttt{cte\char`_cmp2}, luego se procedio a unificar estas dos comparaciones con un \texttt{AND}, es decir, nos quedamos unicamente con los casos donde una componente de \texttt{XMM9} sea menor a su respectiva componente de \texttt{cte\char`_cmp1} y mayor o igual a la de \texttt{cte\char`_cmp2}, luego se almaceno el resultado en \texttt{XMM10}. Este mismo proceso fue repetido pero con \texttt{cte\char`_cmp3} y \texttt{cte\char`_cmp4}, y el resultado fue almacenado en \texttt{XMM12}. Estos resultados luego fueron expandidos a 6 registros \texttt{XMM} mediante un shuffle, el proceso responde al siguiente grafico:\\
 
-\newpage
 \begin{figure}[!h]
 	\centering
 	\includegraphics[scale=1.25]{images/HSLASM1_2}

@@ -229,8 +229,6 @@ ASM_hsl2:
         subps xmm0, xmm6        ; XMM0 = ll_p | ss_p | hh + h - XMM6[2] | x
         addps xmm0, xmm7        ; XMM0 = ll_p | ss_p | hh + h + XMM7[2] | x
 
-        movdqu [r12], xmm0
-
         ; COSO2
 
         ; CALCULO DE C
