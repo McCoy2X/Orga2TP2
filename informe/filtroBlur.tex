@@ -1,46 +1,52 @@
 \section{Filtro 1: Blur}
 
 \subsection{Explicacion}
-El filtro de blur se aplica en cada pixel de la imagen exceptuando los del borde, para eso tomamos el pixel a modificar y los 8 adyacentes y los promediamos para obtener el valor final del pixel.
 
-Debemos tener cuidado a la hora de procesar la imagen de no pisar los datos y operar con los pixeles de la imagen original.
+El filtro $blur$ consiste en para cada pixel (exceptuando los ubicados en el borde), tomar sus 8 vecinos y hacer un promedio para las componente \texttt{R}, \texttt{G} y \texttt{B} entre los 9 pixeles, este nuevo valor reemplaza los que teniamos en el pixel original. El promedio debe ser calculado respecto a los datos originales, es decir, que si al procesar un pixel y alguno de los vecinos ya fue procesado, debemos utilizar los datos del mismo antes de se procesado. Como referencia la catedra proveyo la implementacion del mismo en $C$.
 
 \subsection{Implementacion 1}
 La primera implementacion nos pide que trabajemos de a 1 pixel por iteracion.
 
-Los pixeles estan compuestos por 4 bytes: A R G B, esto nos permite cargar de memoria en un registro XMM 4 pixeles, como nosotros necesitamos 9 pixeles en 3 filas de pixeles diferentes vamos a necesitar 3 registros XMM para cargar los pixeles (Para esto usamos los registros XMM0, XMM2 y XMM4). Y ademas necesito 3 registros XMM mas para luego desenpaquetar los bytes a words. \\
+Los pixeles estan compuestos por 4 bytes: A R G B, esto nos permite cargar 4 pixeles en un registro \texttt{XMM}, como nosotros necesitamos 9 pixeles, ubicados de a 3 en 3 filas diferentes vamos a precisar 3 registros XMM para cargarlos (Para esto usamos los registros XMM0, XMM2 y XMM4). Ademas s utilizaron los siguientes 6 registro de proposito general: \\
 
-Ademas necesitaremos 6 registro de proposito general: \\
-RDI que lo usamos para iterar sobre el eje X \\
-R9 que lo usamos para iterar sobre y \\
-R12 que es un puntero a la copia de la fila superior \\
-R13 que es un puntero a la copia de la fila actual \\
-R8 es un puntero a la inferior fila \\
-R10 es un puntero a la fila actual de la imagen (fila que estoy modificando) \\
+\noindent
+\texttt{RDI} que lo usamos para iterar sobre el eje \texttt{X} \\
+\texttt{R9} que lo usamos para iterar sobre \texttt{Y} \\
+\texttt{R12} que es un puntero a la copia de la fila superior \\
+\texttt{R13} que es un puntero a la copia de la fila actual \\
+\texttt{R8} es un puntero a la fila inferior\\
+\texttt{R10} es un puntero a la fila actual de la imagen (fila que estoy modificando) \\
+
+Esto se puede visualizar en el siguiente grafico:
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.5]{images/BlurASM1_0}
 \end{figure}
 
-Antes de comenzar el ciclo incicializo R9 en 2 y posiciono el puntero a la imagen en la segunda fila de pixeles.
+Donde \texttt{P} es el pixel a procesar.
 
-Al principio de cada ciclo de y muevo R8 a R10, aumento R8 en una fila y inicializo el iterador en x (RDI) en 0.
+Antes de comenzar el ciclo incicializo \texttt{R9} en 2 y posiciono el puntero a la imagen en memoria en la segunda fila de pixeles.
+
+Al principio de cada ciclo de \texttt{Y} muevo \texttt{R8} a \texttt{R10}, aumento \texttt{R8} en una fila e inicializo el iterador en \texttt{X} (ubicado en RDI) en 0.
 
 Muevo a los registros los 3 grupos de pixeles. \\
-	XMM0 = [R12 + RDI] = xx ; p2 ; p1 ; p0 \\
-	XMM1 = [R13 + RDI] = xx ; p5 ; p4 ; p3 \\
-	XMM2 = [R8  + RDI] = xx ; p8 ; p7 ; p6 \\
-\\
-Despues desenpaqueto los pixeles de byte a word para poder sumar los 9 pixeles sin saturacion, hacemos una copia de cada uno para poder desenpaquetar la parte inferior en un registro y la superior en otro (XMM1 = XMM0, XMM3 = XMM2, XMM5 = XMM4) y ademas llenamos un registro (XMM15) con ceros para expandir los componentes con ceros.
-Una vez desenpaquetados nos quedan los registros con los siguientes valores.
-\\
-	XMM0 = p1 ; p0 \\
- 	XMM1 = xx ; p2 \\
- 	XMM2 = p4 ; p3 \\
-	XMM3 = xx ; p5 \\ 
-	XMM4 = p7 ; p6 \\
-	XMM5 = xx ; p8 \\
+
+\noindent
+\texttt{XMM0 = [R12 + RDI] = xx $\vert$ p2 $\vert$ p1 $\vert$ p0}\\
+\texttt{XMM1 = [R13 + RDI] = xx $\vert$ p5 $\vert$ p4 $\vert$ p3}\\
+\texttt{XMM2 = $\ $[R8  + RDI] = xx $\vert$ p8 $\vert$ p7 $\vert$ p6}\\
+
+Despues desempaquetamos los pixeles de $byte$ a $word$ para poder sumar los 9 pixeles sin saturacion, hacemos una copia de cada uno para poder desenpaquetar la parte inferior en un registro y la superior en otro (XMM1 = XMM0, XMM3 = XMM2, XMM5 = XMM4) y ademas llenamos un registro (XMM15) con ceros para expandir cada una de las componentes sin alterar el numero original.
+Una vez desempaquetados nos quedan los registros con los siguientes valores.\\
+
+\noindent
+\texttt{XMM0 = p1 $\vert$ p0} \\
+\texttt{XMM1 = xx $\vert$ p2} \\
+\texttt{XMM2 = p4 $\vert$ p3} \\
+\texttt{XMM3 = xx $\vert$ p5} \\ 
+\texttt{XMM4 = p7 $\vert$ p6} \\
+\texttt{XMM5 = xx $\vert$ p8} \\
 \\
 Ahora sumamos los registros y luego hacemos la division. \\
 Sumando XMM0, XMM2 y XMM3 en XMM15 \\
