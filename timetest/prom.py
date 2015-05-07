@@ -17,7 +17,12 @@ files = ["c.blur.lena", "asm1.blur.lena", "asm2.blur.lena",
 "c.merge.colores", "asm1.merge.colores", "asm2.merge.colores", 
 "c.merge.rojo", "asm1.merge.rojo", "asm2.merge.rojo", 
 "c.merge.verde", "asm1.merge.verde", "asm2.merge.verde", 
-"c.merge.azul", "asm1.merge.azul", "asm2.merge.azul"]
+"c.merge.azul", "asm1.merge.azul", "asm2.merge.azul",
+"c.hsl.lena", "asm1.hsl.lena", "asm2.hsl.lena", 
+"c.hsl.colores", "asm1.hsl.colores", "asm2.hsl.colores", 
+"c.hsl.rojo", "asm1.hsl.rojo", "asm2.hsl.rojo", 
+"c.hsl.verde", "asm1.hsl.verde", "asm2.hsl.verde", 
+"c.hsl.azul", "asm1.hsl.azul", "asm2.hsl.azul"]
 
 for f in files:
 	dataList = []
