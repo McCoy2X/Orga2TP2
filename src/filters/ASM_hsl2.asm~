@@ -16,7 +16,6 @@ extern hslTOrgb
 %define HUE        12
 %define SATURATION 8
 %define LIGHT      4
-%define TAM_FLOAT  4
 
 section .rodata
 
@@ -72,7 +71,6 @@ ASM_hsl2:
         mov rbx, rax
 
         ; Guardo los XMM en el Stack
-        ; Me hago el pelotudo y lo guardo al reves, asi me los levanta bien ;)
 
         movss [rbp - HUE], xmm0
         movss [rbp - SATURATION], xmm1
@@ -83,8 +81,6 @@ ASM_hsl2:
         .ciclo:
         cmp r14d, ebx
         je .fin
-        ; Lentamente me comienzo a cagar en todo
-        ; Cargo las cosas como corresponde y veo que esto lo convierta
         ; COSO
 
         movd xmm15, [r13+r14]
@@ -146,7 +142,7 @@ ASM_hsl2:
         divps xmm8, xmm10         ; XMM8  =      (g-b)/d     |      (b-r)/d     |      (r-g)/d     | -
         addps xmm8, [cte_suma]    ; XMM8  =    (g-b)/d + 6   |    (b-r)/d + 2   |    (r-g)/d + 4   | -
         mulps xmm8, [cte_60]      ; XMM8  = 60*((g-b)/d + 6) | 60*((b-r)/d + 2) | 60*((r-g)/d + 4) | -
-        andps xmm8, xmm4          ; XMM8  = el resultado ENMASCARADO (No me golpeen :P)
+        andps xmm8, xmm4          ; XMM8  = el resultado con la mascara aplicada
         pshufd xmm9, xmm5, 0xFF   ; XMM9  =     cmin     |     cmin     |     cmin     |     cmin   
         pcmpeqd xmm9, xmm2        ; XMM9  = cmin == cmax | cmin == cmax | cmin == cmax | cmin == cmax
         andnps xmm9, xmm8         ; Hago esto para salvar el NaN si dividi por cero 
@@ -157,9 +153,9 @@ ASM_hsl2:
         psrldq xmm8, 4            ;
         addps xmm10, xmm8         ;
         psrldq xmm8, 4            ;
-        addps xmm10, xmm8         ; Esto es mas hackoso que el carajo, pero la verdad la
-        psrldq xmm8, 4            ; suma horizontal es una cagada. :/
-        addps xmm10, xmm8         ; XMM10 = el posta en menos significativos
+        addps xmm10, xmm8         ; 
+        psrldq xmm8, 4            ; 
+        addps xmm10, xmm8         ; XMM10 = el resultado final en menos significativos
         movdqu xmm8, [cte_360_lsb]; XMM8  = 0 | 0 | 0 | 360
         cmpps xmm8, xmm10, 2      ; XMM8 = posta >= 360 (en LSB)
         andps xmm8, [cte_360_lsb] ; XMM8 = (posta >= 360)? 360 : 0 (en LSB)
@@ -201,7 +197,6 @@ ASM_hsl2:
         orps xmm1, xmm10            ; XMM1  = l | s | h | x
 
 
-        ; FIN COSO
         movdqu xmm0, [rbp - 16]  ; XMM0 = ll | ss | hh | x
 
         addps xmm0, xmm1        ; XMM0 = ll + l | ss + s | hh + h | x
@@ -228,8 +223,6 @@ ASM_hsl2:
 
         subps xmm0, xmm6        ; XMM0 = ll_p | ss_p | hh + h - XMM6[2] | x
         addps xmm0, xmm7        ; XMM0 = ll_p | ss_p | hh + h + XMM7[2] | x
-
-        ; COSO2
 
         ; CALCULO DE C
                                 ; XMM0 =       l       |       s       |       h       |       a

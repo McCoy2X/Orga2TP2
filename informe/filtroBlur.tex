@@ -7,15 +7,17 @@ El filtro $blur$ consiste en para cada pixel (exceptuando los ubicados en el bor
 \subsection{Implementacion 1}
 La primera implementacion nos pedia que trabajemos de a 1 pixel por iteracion.
 
-Los pixeles estan compuestos por 4 bytes: A R G B, esto nos permite cargar 4 pixeles en un registro \texttt{XMM}, como nosotros necesitamos 9 pixeles, ubicados de a 3 en 3 filas diferentes vamos a precisar 3 registros XMM para cargarlos (Para esto usamos los registros \texttt{XMM0}, \texttt{XMM2} y \texttt{XMM4}). Ademas s utilizaron los siguientes 6 registro de proposito general: \\
+Los pixeles estan compuestos por 4 bytes: \texttt{A R G B}, esto nos permite cargar 4 pixeles en un registro \texttt{XMM}, como nosotros necesitamos 9 pixeles, ubicados de a 3 en 3 filas diferentes vamos a precisar 3 registros \texttt{XMM} para cargarlos (Para esto usamos los registros \texttt{XMM0}, \texttt{XMM2} y \texttt{XMM4}). Ademas se utilizaron los siguientes 6 registro de proposito general: \\
 
 \noindent
-\texttt{RDI} que lo usamos para iterar sobre el eje \texttt{X} \\
-\texttt{R9} que lo usamos para iterar sobre \texttt{Y} \\
-\texttt{R12} que es un puntero a la copia de la fila superior \\
-\texttt{R13} que es un puntero a la copia de la fila actual \\
-\texttt{R8} es un puntero a la fila inferior\\
-\texttt{R10} es un puntero a la fila actual de la imagen (fila que estoy modificando) \\
+\begin{itemize}
+\item \texttt{RDI} que lo usamos para iterar sobre el eje \texttt{X}
+\item \texttt{R9} que lo usamos para iterar sobre \texttt{Y}
+\item \texttt{R12} que es un puntero a la copia de la fila superior
+\item \texttt{R13} que es un puntero a la copia de la fila actual
+\item \texttt{R8} es un puntero a la fila inferior
+\item \texttt{R10} es un puntero a la fila actual de la imagen (fila que estoy modificando)
+\end{itemize}
 
 Esto se puede visualizar en el siguiente grafico:
 
@@ -114,7 +116,7 @@ De la misma forma que en la primer implementacion desempaquetamos los registros 
 \texttt{XMM10 $\gets$ p14 $\ \vert$ p13} \\
 \texttt{XMM11 $\gets$ p16 $\ \vert$ p15} \\
 
-Con todos los registros cargados, procedimos a sumar cada uno de ellos con XMM15, el resutlado final fue el siguiente:\\\
+Con todos los registros cargados, procedimos a sumar cada uno de ellos con XMM15, el resutlado final fue el siguiente:\\
 
 \noindent
 \texttt{XMM15 $\gets$ p1 + p2 + p3 + p7 + p8 + p9 + p13 + p14 + p15 $\vert$ p0 + p1 + p2 + p6 + p7 + p8 + p12 + p13 + p14}\\
@@ -136,7 +138,7 @@ Luego hicimos copias en \texttt{XMM1}, \texttt{XMM5} y \texttt{XMM9} y desempaqu
 \texttt{XMM8 $\gets$ p15 $\vert$ p14}\\
 \texttt{XMM9 $\gets$ p17 $\vert$ p16}\\
 
-Nuevamente sumamos los registros de la misma forma que antes, es decir, uno a uno con \texttt{XMM15}, el resultado final es:
+Nuevamente sumamos los registros de la misma forma que antes, es decir, uno a uno con \texttt{XMM15}, el resultado final es:\\
 
 \noindent
 \texttt{XMM15 $\gets$ p3 + p4 + p5 + p9 + p10 + p11 + p15 + p16 + p17 $\vert$ p2 + p3 + p4 + p8 + p9 + p10 + p14 + p15 + p16}
