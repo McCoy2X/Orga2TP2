@@ -53,30 +53,28 @@ ASM_blur2:
 	MOV  R8, R13	; R8 = * data
 	MOV  R13, RAX	; * fila pixeles del medio
 	SUB  R14, 16
-
+	
 	; Recorro y copio las 2 filas de pixeles
 	MOV RDI, 0 		; Iterador
 	MOV RSI, R8		; Puntero a segunda fila
 	ADD RSI, R14
-	.cicloget:
-		MOV EDX, [R8 + RDI]
-		MOV [R12 + RDI], EDX
-		MOV EDX, [RSI + RDI]
-		MOV [R13 + RDI], EDX
-		ADD RDI, 4
+	.get:
+		MOVDQU XMM0, [R8 + RDI]
+		MOVDQU [R12 + RDI], XMM0
+		MOVDQU XMM0, [RSI + RDI]
+		MOVDQU [R13 + RDI], XMM0
+		ADD RDI, 16
 		CMP RDI, R14
-		JL  .cicloget
+		JL  .get
 
 	; Ciclo
-	MOV R9, 2	; Iterador en y
 	ADD R8, R14	; Posiciono *data en la segunda fila 
-	.cicloy:
+	MOV R10, R8 ; Guardo el R8 anterior
+	ADD R8, R14 ; Avanzo una fila
+	MOV RDI, 0  ; Iterador en x
+	MOV R9, 2	; Iterador en y
+	.ciclo:
 
-		MOV R10, R8
-		ADD R8, R14 ; Avanzo una fila
-		MOV RDI, 0 ; Iterador en x
-
-		.ciclox:
 			; Pixel 0 y 1
 
 			; Clear XMM to unpack with ceroes
@@ -217,7 +215,7 @@ ASM_blur2:
 			MOV R11, R14
 			SUB R11, 16
 			CMP RDI, R11	; Veo si llegue al final
-			JL  .ciclox
+			JL  .ciclo
 
 			; Blureo los ultimos 2 pixeles de la linea
 			PXOR      XMM15, XMM15
@@ -280,21 +278,24 @@ ASM_blur2:
 
 			MOVD DWORD [R10 + RDI + 8], XMM14	; Escribo en memoria (Imagen)
 
-		; Recorro y copio las 2 filas de pixeles siguientes
+		; Recorro y copio la fila de pixeles siguientes, swapeo los punteros (Y copio )
 		MOV RDI, 0 		; Iterador
 		MOV RSI, R8 	; Puntero a segunda fila
-		.cicloxget:
-			MOV EDX, [R13 + RDI]
-			MOV [R12 + RDI], EDX
-			MOV EDX, [RSI + RDI]
-			MOV [R13 + RDI], EDX
-			ADD RDI, 4
+		XCHG R13, R12	; Exchange R13 and R12 pointers to allocated memory
+		.cicloget:
+			MOVDQU XMM0, [RSI + RDI]
+			MOVDQU [R13 + RDI], XMM0
+			ADD RDI, 16
 			CMP RDI, R14
-			JL  .cicloxget
+			JL  .cicloget
+
+		MOV R10, R8 ; Guardo el R8 anterior
+		ADD R8, R14 ; Avanzo una fila
+		MOV RDI, 0 ; Iterador en x
 
 		INC R9
 		CMP R9, R15  ; Veo si todavia tengo pixeles por recorrer
-		JL .cicloy
+		JL  .ciclo
 
 	; Libero la memoria que pedi
 	MOV RDI, R12

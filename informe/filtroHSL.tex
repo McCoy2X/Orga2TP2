@@ -309,42 +309,44 @@ Con estos registros, lo unico faltante fue realizar las operaciones aritmeticas 
 
 \subsection{Resultados}
 
-Al igual que con los dos casos anteriores, empezamos corriendo la version de $C$ con optimizaciones de nivel 3, junto con la imagen $lena$ brindada por la catedra, se tomaron cien muestras con versiones de la imagen que fuesen multiplos de 16x16, hasta llegar a 320x320. Aqui se encuentran graficados el maximo, minimo y el promedio:\\
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.5]{images/c_asm1_asm2_hsl_comp}
-\end{figure}
+% Al igual que con los dos casos anteriores, empezamos corriendo la version de $C$ con optimizaciones de nivel 3, junto con la imagen $lena$ brindada por la catedra, se tomaron cien muestras con versiones de la imagen que fuesen multiplos de 16x16, hasta llegar a 320x320. Aqui se encuentran graficados el maximo, minimo y el promedio:\\
 
-Los resultados fueron sorpresivos, ya que a diferencia de los dos filtros anteriores, aqui nos encontramos con que la version de $C$ era mas veloz que las implementaciones de $Assembler$. Esto nos llevo a plantearnos si los saltos condicionales de $C$ , en el peor caso, podian llegar a hacer que las implementaciones en $Assembler$ fuesen mas rapidas. Para probar eso se nos ocurrieron dos tests:\\
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.5]{images/c_asm1_asm2_hsl_comp}
+% \end{figure}
 
-\begin{itemize}
-	\item Testear imagenes completamente rojas, azules y verdes (una de cada una), junto con $colores$ y $lena$, para ver si el salto condicional en $RGBtoHSL$ impactaba al rendimiento.
-	\item Testear con diferentes valores de \texttt{HH}, tomando valores aleatorios entre cero y uno para \text{SS} y \texttt{LL}, esto lo hacemos para probar si el condicional de 6 casos en $HSLtoRGB$ afecta el rendimiento.
-\end{itemize}
+% Los resultados fueron sorpresivos, ya que a diferencia de los dos filtros anteriores, aqui nos encontramos con que la version de $C$ era mas veloz que las implementaciones de $Assembler$. Esto nos llevo a plantearnos si los saltos condicionales de $C$ , en el peor caso, podian llegar a hacer que las implementaciones en $Assembler$ fuesen mas rapidas. Para probar eso se nos ocurrieron dos tests:\\
 
-Para el primer test se obtuvieron los siguientes resultados:\\
+% \begin{itemize}
+% 	\item Testear imagenes completamente rojas, azules y verdes (una de cada una), junto con $colores$ y $lena$, para ver si el salto condicional en $RGBtoHSL$ impactaba al rendimiento.
+% 	\item Testear con diferentes valores de \texttt{HH}, tomando valores aleatorios entre cero y uno para \text{SS} y \texttt{LL}, esto lo hacemos para probar si el condicional de 6 casos en $HSLtoRGB$ afecta el rendimiento.
+% \end{itemize}
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.45]{images/c_hsl_lena_colors}
-	\includegraphics[scale=0.45]{images/asm1_hsl_lena_colors}
-	\includegraphics[scale=0.45]{images/asm2_hsl_lena_colors}
-\end{figure}
+% Para el primer test se obtuvieron los siguientes resultados:\\
 
-Como podemos ver, la segundo implementacion (que no usa ningun tipo de condicional) se matuvo constante independientemente del contenido de la imagen, mientras que la de $C$ y la primer implementacion en $Assembler$, que emplean condicionales tuvieron una diferencia considerable en resultados. De todas formas, la implementacion de $C$ termino siendo la de mejor rendimiento.
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.45]{images/c_hsl_lena_colors}
+% 	\includegraphics[scale=0.45]{images/asm1_hsl_lena_colors}
+% 	\includegraphics[scale=0.45]{images/asm2_hsl_lena_colors}
+% \end{figure}
 
-Para el segundo test se obtvieron los siguientes resultados:\\
+% Como podemos ver, la segundo implementacion (que no usa ningun tipo de condicional) se matuvo constante independientemente del contenido de la imagen, mientras que la de $C$ y la primer implementacion en $Assembler$, que emplean condicionales tuvieron una diferencia considerable en resultados. De todas formas, la implementacion de $C$ termino siendo la de mejor rendimiento.
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.45]{images/c_lenahsl}
-	\includegraphics[scale=0.45]{images/asm1_lenahsl}
-	\includegraphics[scale=0.45]{images/asm2_lenahsl}
-\end{figure}
+% Para el segundo test se obtvieron los siguientes resultados:\\
 
-Aqui podemos ver que el valor de \texttt{HH} no afecta en gran manera al rendimiento, ya que la cantidad de ciclos se mantiene relativamente constante independientemente del \texttt{HH}, y al igual que el primer test, la implementacion de $C$ sigue teniendo mejor rendimiento.
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.45]{images/c_lenahsl}
+% 	\includegraphics[scale=0.45]{images/asm1_lenahsl}
+% 	\includegraphics[scale=0.45]{images/asm2_lenahsl}
+% \end{figure}
+
+% Aqui podemos ver que el valor de \texttt{HH} no afecta en gran manera al rendimiento, ya que la cantidad de ciclos se mantiene relativamente constante independientemente del \texttt{HH}, y al igual que el primer test, la implementacion de $C$ sigue teniendo mejor rendimiento.
 
 \subsection{Conclusion}
 
-Este filtro trajo varias sorpresas respecto al rendimiento, si bien los condicionales afectaron en mayor o menor medida a la implementacion en $C$, esta termino siendo la mejor en practicamente todos los casos probados. Consideramos que esto se debe a que el trabajo que realiza el filtro no era amigable al paralelismo, es decir, muchas veces se realizaban calculos que luego terminan siendo filtrado por alguna mascara.
+
+% Este filtro trajo varias sorpresas respecto al rendimiento, si bien los condicionales afectaron en mayor o menor medida a la implementacion en $C$, esta termino siendo la mejor en practicamente todos los casos probados. Consideramos que esto se debe a que el trabajo que realiza el filtro no era amigable al paralelismo, es decir, muchas veces se realizaban calculos que luego terminan siendo filtrado por alguna mascara.

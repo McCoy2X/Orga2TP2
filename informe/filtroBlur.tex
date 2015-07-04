@@ -1,11 +1,20 @@
 \section{Filtro 1: Blur}
 
+\subsection{Cambios}
+Para el recuperatorio decidimos hacer cambios en el codigo y comparar la version vieja del codigo con la nueva.
+
+La lista de cambios esta a continuacion, con la aclaracacion de por que se hicieron los mismos:
+\noindent
+\begin{itemize}
+\item Se remplazaron las operaciones que realizaban la copia por operaciones de SIMD para aumentar la velocidad a la que se copian los pixeles, tambien se modifico el codigo el cual antes copiaba las dos filas de pixeles superiores para que solo copie una (Swapeando los punteros de R13 con R12 y luego copiando en R13 los datos de la fila inferior)
+\end{itemize}
+
 \subsection{Explicacion}
 
-El filtro $blur$ consiste en para cada pixel (exceptuando los ubicados en el borde), tomar sus 8 vecinos y hacer un promedio para las componente \texttt{R}, \texttt{G} y \texttt{B} entre los 9 pixeles, este nuevo valor reemplaza los que teniamos en el pixel original. El promedio debe ser calculado respecto a los datos originales, es decir, que si al procesar un pixel y alguno de los vecinos ya fue procesado, debemos utilizar los datos del mismo antes de se procesado. Como referencia la catedra proveyo la implementacion del mismo en $C$.
+El filtro $blur$ consiste en para cada pixel (exceptuando los ubicados en el borde), tomar sus 8 vecinos y hacer un promedio de cada uno de sus componentes \texttt{R}, \texttt{G} y \texttt{B} entre los 9 pixeles, este nuevo valor reemplaza los que teniamos en el pixel actual. El promedio debe ser calculado respecto a los datos originales, es decir, que si al procesar un pixel y alguno de los vecinos ya fue procesado, debemos utilizar los datos del mismo antes de la modificacion. Nuestro algoritmo se basara en el implementado por la catedra en $C$ pero aprovechando de las operaciones vectoriales de SIMD para mejorar su performance tratando de trabajar con la mayor cantidad de datos al mismo tiempo.
 
 \subsection{Implementacion 1}
-La primera implementacion nos pedia que trabajemos de a 1 pixel por iteracion.
+La primera implementacion nos pide trabajar de a 1 pixel por iteracion.
 
 Los pixeles estan compuestos por 4 bytes: \texttt{A R G B}, esto nos permite cargar 4 pixeles en un registro \texttt{XMM}, como nosotros necesitamos 9 pixeles, ubicados de a 3 en 3 filas diferentes vamos a precisar 3 registros \texttt{XMM} para cargarlos (Para esto usamos los registros \texttt{XMM0}, \texttt{XMM2} y \texttt{XMM4}). Ademas se utilizaron los siguientes 6 registro de proposito general: \\
 
@@ -148,35 +157,39 @@ Como podemos apreciar, en este caso las cuentas tambien responden a lo presentad
 Una vez terminado el procesamiento de pixeles, comparamo el iterador con la cantidad de pixeles en una fila y repetimos hasta llegar hasta los ultimos 16 bytes de la fila, estos ultimos 16 bytes los cargamos en solo 3 registros \texttt{XMM} y los procesamos al igual que la primera parte del ciclo para asegurarme de no pasarnos. Al final del ciclo hacemos las copias pertinentes, incrementamos el iterador de filas y revisamos si llegamos al final. \\
 
 \subsection{Resultados}
-Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320). Cada tamaño se ejecuta 100 veces, despues se saca un promedio y se lo grafica junto con el maximo y el minimo. La metodologia adoptada para evaluar la eficacia de las implementaciones es tomar la cantidad de ciclos que tarda en correr cada una de las implementaciones, esto lo hacemos mediante la libreria \texttt{rdtsc.h}, las pruebas van a ser ejecutadas en un \texttt{Intel Core i7 4700MQ}. Estas condiciones de prueba se mantendran durante el resto del informe y para todos los filtros.
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.45]{images/c_blur}
-	\includegraphics[scale=0.45]{images/asm1_blur}
-	\includegraphics[scale=0.45]{images/asm2_blur}
-\end{figure}
 
-Ahora graficamos los 3 valores promedios de $blur$ para ver cual de ellos es el mas rapido en general. Para ver mejor la diferencia entre ASM1 y ASM2 los graficamos aparte.
+% Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320). Cada tamaño se ejecuta 100 veces, despues se saca un promedio y se lo grafica junto con el maximo y el minimo. La metodologia adoptada para evaluar la eficacia de las implementaciones es tomar la cantidad de ciclos que tarda en correr cada una de las implementaciones, esto lo hacemos mediante la libreria \texttt{rdtsc.h}, las pruebas van a ser ejecutadas en un \texttt{Intel Core i7 4700MQ}. Estas condiciones de prueba se mantendran durante el resto del informe y para todos los filtros.
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.5]{images/c_asm1_asm2_blur_comp}
-	\includegraphics[scale=0.5]{images/asm1_asm2_blur_comp}
-\end{figure}
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.45]{images/c_blur}
+% 	\includegraphics[scale=0.45]{images/asm1_blur}
+% 	\includegraphics[scale=0.45]{images/asm2_blur}
+% \end{figure}
 
-Este grafico nos muestra que el codigo de ASM2 pareceria ser el mas rapido. Antes de confirmar esto queremos ver que no haya ningun tipo de factor en la imagen que influya en el tiempo de ejecucion que no sea el tamaño. \\
+% Ahora graficamos los 3 valores promedios de $blur$ para ver cual de ellos es el mas rapido en general. Para ver mejor la diferencia entre ASM1 y ASM2 los graficamos aparte.
 
-Tanto en el codigo de C como en el ASM1 y ASM2 no poseen ninguna operacion que dependa de los pixeles a procesar, para probar que esto es realmente asi en la practica decidimos correr los test al igual que al principio pero esta vez usando la imagen de $lena$, $colores$ y 3 imagenes mas completamente rojas, azules y verdes.\\
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.5]{images/c_asm1_asm2_blur_comp}
+% 	\includegraphics[scale=0.5]{images/asm1_asm2_blur_comp}
+% \end{figure}
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.45]{images/c_blur_lena_colors}
-	\includegraphics[scale=0.45]{images/asm1_blur_lena_colors}
-	\includegraphics[scale=0.45]{images/asm2_blur_lena_colors}
-\end{figure}
+% Este grafico nos muestra que el codigo de ASM2 pareceria ser el mas rapido. Antes de confirmar esto queremos ver que no haya ningun tipo de factor en la imagen que influya en el tiempo de ejecucion que no sea el tamaño. \\
+
+% Tanto en el codigo de C como en el ASM1 y ASM2 no poseen ninguna operacion que dependa de los pixeles a procesar, para probar que esto es realmente asi en la practica decidimos correr los test al igual que al principio pero esta vez usando la imagen de $lena$, $colores$ y 3 imagenes mas completamente rojas, azules y verdes.\\
+
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.45]{images/c_blur_lena_colors}
+% 	\includegraphics[scale=0.45]{images/asm1_blur_lena_colors}
+% 	\includegraphics[scale=0.45]{images/asm2_blur_lena_colors}
+% \end{figure}
 
 \subsection{Conclusion}
-Luego de la experimentacion podemos concluir que ASM2 es el mas rapido en general. \\
 
-La imagen a procesar no afecta en nada el tiempo de ejecucion y el tamaño lo afecta solo por que se deben procesar mas pixeles. \\
+
+% Luego de la experimentacion podemos concluir que ASM2 es el mas rapido en general. \\
+
+% La imagen a procesar no afecta en nada el tiempo de ejecucion y el tamaño lo afecta solo por que se deben procesar mas pixeles. \\

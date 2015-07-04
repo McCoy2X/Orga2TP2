@@ -86,33 +86,36 @@ Al final tenemos:\\
 Para terminar solo fue necesario sumarlos y moverlos a memoria.
 
 \subsection{Resultados}
-Para la experimentacion vamos a correr las 3 implementaciones (La version de $C$ compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320), se corren 100 veces cada tamaño y despues se saca un promedio y se grafica el maximo, el minimo y el promedio.
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.45]{images/c_merge}
-	\includegraphics[scale=0.45]{images/asm1_merge}
-	\includegraphics[scale=0.45]{images/asm2_merge}
-\end{figure}
 
-Tambien graficamos los 3 promedios en un grafico para ver cual de ellos es el mas rapido en general. Y para ver mejor la diferencia entre ASM1 y ASM2 los graficamos aparte.
+% Para la experimentacion vamos a correr las 3 implementaciones (La version de $C$ compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320), se corren 100 veces cada tamaño y despues se saca un promedio y se grafica el maximo, el minimo y el promedio.
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.5]{images/c_asm1_asm2_merge_comp}
-	\includegraphics[scale=0.5]{images/asm1_asm2_merge_comp}
-\end{figure}
-\newpage
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.45]{images/c_merge}
+% 	\includegraphics[scale=0.45]{images/asm1_merge}
+% 	\includegraphics[scale=0.45]{images/asm2_merge}
+% \end{figure}
 
-Tambien queremos ver que la imagen no modifique el tiempo de ejecucion, tanto el codigo de C como el de ASM no poseen ningun salto condicional que depende de el valor de los pixeles.
+% Tambien graficamos los 3 promedios en un grafico para ver cual de ellos es el mas rapido en general. Y para ver mejor la diferencia entre ASM1 y ASM2 los graficamos aparte.
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[scale=0.45]{images/c_merge_lena_colors}
-	\includegraphics[scale=0.45]{images/asm1_merge_lena_colors}
-	\includegraphics[scale=0.45]{images/asm2_merge_lena_colors}
-\end{figure}
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.5]{images/c_asm1_asm2_merge_comp}
+% 	\includegraphics[scale=0.5]{images/asm1_asm2_merge_comp}
+% \end{figure}
+% \newpage
+
+% Tambien queremos ver que la imagen no modifique el tiempo de ejecucion, tanto el codigo de C como el de ASM no poseen ningun salto condicional que depende de el valor de los pixeles.
+
+% \begin{figure}[h!]
+% 	\centering
+% 	\includegraphics[scale=0.45]{images/c_merge_lena_colors}
+% 	\includegraphics[scale=0.45]{images/asm1_merge_lena_colors}
+% 	\includegraphics[scale=0.45]{images/asm2_merge_lena_colors}
+% \end{figure}
 
 \subsection{Conclusion}
 
-Al igual que en el primer filtro, las implementacion de $Assembler$ terminaron siendo mas veloces que la de $C$. La consistencia de los resultados tambien nos lleva a concluir que el costo en tiempo de hacer las conversiones en la primer implementacion es considerable, ya que la segunda version, al estar realizada sobre enteros minimizando las operaciones de punto flotante, tardo considerablemente menos.
+
+% Al igual que en el primer filtro, las implementacion de $Assembler$ terminaron siendo mas veloces que la de $C$. La consistencia de los resultados tambien nos lleva a concluir que el costo en tiempo de hacer las conversiones en la primer implementacion es considerable, ya que la segunda version, al estar realizada sobre enteros minimizando las operaciones de punto flotante, tardo considerablemente menos.

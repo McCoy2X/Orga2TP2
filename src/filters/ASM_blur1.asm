@@ -59,90 +59,91 @@ ASM_blur1:
 	MOV RDI, 0 		; Iterador
 	MOV RSI, R8		; Puntero a segunda fila
 	ADD RSI, R14
-	.cicloget:
-		MOV EDX, [R8 + RDI]
-		MOV [R12 + RDI], EDX
-		MOV EDX, [RSI + RDI]
-		MOV [R13 + RDI], EDX
-		ADD RDI, 4
+	.get:
+		MOVDQU XMM0, [R8 + RDI]
+		MOVDQU [R12 + RDI], XMM0
+		MOVDQU XMM0, [RSI + RDI]
+		MOVDQU [R13 + RDI], XMM0
+		ADD RDI, 16
 		CMP RDI, R14
-		JL  .cicloget
+		JL  .get
 
 	; Ciclo
-	MOV R9, 2	; Iterador en y
 	ADD R8, R14	; Posiciono *data en la segunda fila 
-	.cicloy:
+	MOV R10, R8 ; Guardo el R8 anterior
+	ADD R8, R14 ; Avanzo una fila
+	MOV RDI, 0  ; Iterador en x
+	MOV R9, 2	; Iterador en y
+	.ciclo:
+
+		; Clear XMM15 to unpack with ceroes
+		PXOR      XMM15, XMM15
+		; Tomo los 9 pixeles de memoria
+		MOVDQU    XMM0, [R12 + RDI]		; XMM0 = x | p2 | p1 | p0
+		MOVDQU    XMM1, XMM0			; XMM1 = XMM0
+		PUNPCKLBW XMM0, XMM15			; XMM0 = p1 | p0
+		PUNPCKHBW XMM1, XMM15			; XMM1 = xx | p2
+
+		MOVDQU    XMM2, [R13 + RDI]		; XMM2 = x | p5 | p4 | p3
+		MOVDQU    XMM3, XMM2			; XMM3 = XMM2
+		PUNPCKLBW XMM2, XMM15			; XMM2 = p4 | p3
+		PUNPCKHBW XMM3, XMM15			; XMM3 = xx | p5
+
+		MOVDQU    XMM4, [R8  + RDI - 4]	; XMM4 = p8 | p7 | p6 | x
+		PSRLDQ    XMM4, 4				; XMM4 = x | p8 | p7 | p6
+		MOVDQU    XMM5, XMM4			; XMM5 = XMM4
+		PUNPCKLBW XMM4, XMM15			; XMM4 = p7 | p6
+		PUNPCKHBW XMM5, XMM15			; XMM5 = xx | p8
+
+		; Sumo los 9 pixeles
+		MOVDQU    XMM15, XMM0		; XMM15 = p1 | p0
+		MOVDQU    XMM14, XMM1       ; XMM14 = xx | p2
+		PADDUSW   XMM15, XMM2		; XMM15 = p1 + p4 | p0 + p3
+		PADDUSW   XMM14, XMM3       ; XMM14 = xx | p2 + p5
+		PADDUSW   XMM15, XMM4		; XMM15 = p1 + p4 + p7 | p0 + p3 + p6
+		PADDUSW   XMM14, XMM5       ; XMM14 = xx | p2 + p5 + p8
+		MOVDQU    XMM13, XMM15		; XMM13 = XMM15
+		PSRLDQ    XMM13, 8			; XMM13 = xx | p1 + p4 + p7
+		PADDUSW   XMM15, XMM14		; XMM15 = p1 + p4 + p7 | p0 + p2 + p3 + p5 + p6 + p8
+		PADDUSW   XMM15, XMM13      ; XMM15 = xx | p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8
+
+		; Divido por 9
+		MOVDQU    XMM14, XMM15		; XMM14 = XMM15
+		PMULHW    XMM15, XMM12		; High of psum * dosk
+		PMULLW    XMM14, XMM12		; Low of psum * dosk
+		PUNPCKLWD XMM14, XMM15		; XMM15 = psum
+		PSRLD     XMM14, 16			; XMM14 >> 16
+		PACKUSDW  XMM14, XMM15		; XMM14 = psum
+		PACKUSWB  XMM14, XMM15		; XMM14 = psum
+
+		MOVD DWORD [R10 + RDI + 4], XMM14	; Escribo en memoria (Imagen)
+
+		; Me muevo y checkeo si llegue al final de la linea
+		ADD RDI, 4
+		MOV RSI, R14
+		SUB RSI, 8
+		CMP RDI, RSI	; Veo si llegue al final
+		JL  .ciclo
+
+		; Recorro y copio la fila de pixeles siguientes, swapeo los punteros (Y copio )
+		MOV RDI, 0 		; Iterador
+		MOV RSI, R8 	; Puntero a segunda fila
+		XCHG R13, R12	; Exchange R13 and R12 pointers to allocated memory
+		.cicloget:
+			MOVDQU XMM0, [RSI + RDI]
+			MOVDQU [R13 + RDI], XMM0
+			ADD RDI, 16
+			CMP RDI, R14
+			JL  .cicloget
 
 		MOV R10, R8 ; Guardo el R8 anterior
 		ADD R8, R14 ; Avanzo una fila
 		MOV RDI, 0 ; Iterador en x
 
-		.ciclox:
-			; Clear XMM15 to unpack with ceroes
-			PXOR      XMM15, XMM15
-			; Tomo los 9 pixeles de memoria
-			MOVDQU    XMM0, [R12 + RDI]		; XMM0 = x | p2 | p1 | p0
-			MOVDQU    XMM1, XMM0			; XMM1 = XMM0
-			PUNPCKLBW XMM0, XMM15			; XMM0 = p1 | p0
-			PUNPCKHBW XMM1, XMM15			; XMM1 = xx | p2
-
-			MOVDQU    XMM2, [R13 + RDI]		; XMM2 = x | p5 | p4 | p3
-			MOVDQU    XMM3, XMM2			; XMM3 = XMM2
-			PUNPCKLBW XMM2, XMM15			; XMM2 = p4 | p3
-			PUNPCKHBW XMM3, XMM15			; XMM3 = xx | p5
-
-			MOVDQU    XMM4, [R8  + RDI - 4]	; XMM4 = p8 | p7 | p6 | x
-			PSRLDQ    XMM4, 4				; XMM4 = x | p8 | p7 | p6
-			MOVDQU    XMM5, XMM4			; XMM5 = XMM4
-			PUNPCKLBW XMM4, XMM15			; XMM4 = p7 | p6
-			PUNPCKHBW XMM5, XMM15			; XMM5 = xx | p8
-
-			; Sumo los 9 pixeles
-			MOVDQU    XMM15, XMM0		; XMM15 = p1 | p0
-			MOVDQU    XMM14, XMM1       ; XMM14 = xx | p2
-			PADDUSW   XMM15, XMM2		; XMM15 = p1 + p4 | p0 + p3
-			PADDUSW   XMM14, XMM3       ; XMM14 = xx | p2 + p5
-			PADDUSW   XMM15, XMM4		; XMM15 = p1 + p4 + p7 | p0 + p3 + p6
-			PADDUSW   XMM14, XMM5       ; XMM14 = xx | p2 + p5 + p8
-			MOVDQU    XMM13, XMM15		; XMM13 = XMM15
-			PSRLDQ    XMM13, 8			; XMM13 = xx | p1 + p4 + p7
-			PADDUSW   XMM15, XMM14		; XMM15 = p1 + p4 + p7 | p0 + p2 + p3 + p5 + p6 + p8
-			PADDUSW   XMM15, XMM13      ; XMM15 = xx | p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8
-
-			; Divido por 9
-			MOVDQU    XMM14, XMM15		; XMM14 = XMM15
-			PMULHW    XMM15, XMM12		; High of psum * dosk
-			PMULLW    XMM14, XMM12		; Low of psum * dosk
-			PUNPCKLWD XMM14, XMM15		; XMM15 = psum
-			PSRLD     XMM14, 16			; XMM14 >> 16
-			PACKUSDW  XMM14, XMM15		; XMM14 = psum
-			PACKUSWB  XMM14, XMM15		; XMM14 = psum
-
-			MOVD DWORD [R10 + RDI + 4], XMM14	; Escribo en memoria (Imagen)
-
-			; Me muevo y checkeo si llegue al final de la linea
-			ADD RDI, 4
-			MOV RSI, R14
-			SUB RSI, 8
-			CMP RDI, RSI	; Veo si llegue al final
-			JL  .ciclox
-
-		; Recorro y copio las 2 filas de pixeles siguientes
-		MOV RDI, 0 		; Iterador
-		MOV RSI, R8 	; Puntero a fila inferior
-		.cicloxget:
-			MOV EDX, [R13 + RDI]
-			MOV [R12 + RDI], EDX
-			MOV EDX, [RSI + RDI]
-			MOV [R13 + RDI], EDX
-			ADD RDI, 4
-			CMP RDI, R14
-			JL  .cicloxget
-
 		INC R9
 		CMP R9, R15  ; Veo si todavia tengo pixeles por recorrer
-		JL .cicloy
-
+		JL  .ciclo
+	
 	; Libero la memoria que pedi
 	MOV RDI, R12
 	CALL free
