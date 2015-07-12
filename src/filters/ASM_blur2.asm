@@ -67,6 +67,9 @@ ASM_blur2:
 		CMP RDI, R14
 		JL  .get
 
+	; Limpio XMM12 para desenpacketar
+	PXOR XMM12, XMM12
+
 	; Ciclo
 	ADD R8, R14	; Posiciono *data en la segunda fila 
 	MOV R10, R8 ; Guardo el R8 anterior
@@ -77,44 +80,44 @@ ASM_blur2:
 
 			; Pixel 0 y 1
 
-			; Clear XMM to unpack with ceroes
-			PXOR      XMM15, XMM15
 			; Tomo los pixeles de memoria
 			MOVDQU    XMM0, [R12 + RDI]	; XMM0 = p3 | p2 | p1 | p0
 			MOVDQU    XMM1, XMM0		; XMM1 = XMM0
-			PUNPCKLBW XMM0, XMM15		; XMM0 = p1 | p0
-			PUNPCKHBW XMM1, XMM15		; XMM1 = p3 | p2
+			PUNPCKLBW XMM0, XMM12		; XMM0 = p1 | p0
+			PUNPCKHBW XMM1, XMM12		; XMM1 = p3 | p2
 
 			MOVDQU    XMM2, [R12 + RDI + 4]	; XMM2 = p4 | p3 | p2 | p1
 			MOVDQU    XMM3, XMM2		; XMM3 = XMM2
-			PUNPCKLBW XMM2, XMM15		; XMM2 = p2 | p1
-			PUNPCKHBW XMM3, XMM15		; XMM3 = p4 | p3
+			PUNPCKLBW XMM2, XMM12		; XMM2 = p2 | p1
+			PUNPCKHBW XMM3, XMM12		; XMM3 = p4 | p3
 
 			MOVDQU    XMM4, [R13 + RDI]	; XMM4 = p9 | p8 | p7 | p6
 			MOVDQU    XMM5, XMM4		; XMM5 = XMM4
-			PUNPCKLBW XMM4, XMM15		; XMM4 = p7 | p6
-			PUNPCKHBW XMM5, XMM15		; XMM5 = p9 | p8
+			PUNPCKLBW XMM4, XMM12		; XMM4 = p7 | p6
+			PUNPCKHBW XMM5, XMM12		; XMM5 = p9 | p8
 
 			MOVDQU    XMM6, [R13 + RDI + 4]	; XMM6 = p10 | p9 | p8 | p7
 			MOVDQU    XMM7, XMM6		; XMM7 = XMM6
-			PUNPCKLBW XMM6, XMM15		; XMM6 = p8 | p7
-			PUNPCKHBW XMM7, XMM15		; XMM7 = p10 | p9
+			PUNPCKLBW XMM6, XMM12		; XMM6 = p8 | p7
+			PUNPCKHBW XMM7, XMM12		; XMM7 = p10 | p9
 
 			MOVDQU    XMM8, [R8  + RDI]	; XMM8 = p15 | p14 | p13 | p12
 			MOVDQU    XMM9, XMM8		; XMM9 = XMM8
-			PUNPCKLBW XMM8, XMM15		; XMM8 = p13 | p12
-			PUNPCKHBW XMM9, XMM15		; XMM9 = p15 | p14
+			PUNPCKLBW XMM8, XMM12		; XMM8 = p13 | p12
+			PUNPCKHBW XMM9, XMM12		; XMM9 = p15 | p14
 
 			MOVDQU    XMM10, [R8  + RDI + 4]	; XMM10 = p16 | p15 | p14 | p13
 			MOVDQU    XMM11, XMM10		; XMM11 = XMM10
-			PUNPCKLBW XMM10, XMM15		; XMM10 = p14 | p13
-			PUNPCKHBW XMM11, XMM15		; XMM11 = p16 | p15
+			PUNPCKLBW XMM10, XMM12		; XMM10 = p14 | p13
+			PUNPCKHBW XMM11, XMM12		; XMM11 = p16 | p15
 
 			; Sumo los 9 pixeles de 0 y 1, guardo el resultado en XMM15
+			PXOR      XMM15, XMM15
 			PADDUSW   XMM15, XMM0		; XMM15 = p1 | p0
 			PADDUSW   XMM15, XMM1		; XMM15 = p1 + p3 | p0 + p2
 			PADDUSW   XMM15, XMM2		; XMM15 = p1 + p2 + p3 | p0 + p1 + p2
 			PADDUSW   XMM15, XMM4		; XMM15 = p1 + p2 + p3 + p7 | p0 + p1 + p2 + p6
+
 			PADDUSW   XMM15, XMM5		; XMM15 = p1 + p2 + p3 + p7 + p9 | p0 + p1 + p2 + p6 + p8
 			PADDUSW   XMM15, XMM6		; XMM15 = p1 + p2 + p3 + p7 + p8 + p9 | p0 + p1 + p2 + p6 + p7 + p8
 			PADDUSW   XMM15, XMM8		; XMM15 = p1 + p2 + p3 + p7 + p8 + p9 + p13 | p0 + p1 + p2 + p6 + p7 + p8 + p12
@@ -154,24 +157,23 @@ ASM_blur2:
 			; Tomo los pixeles de memoria
 
 			; Clear XMM to unpack with ceroes
-			PXOR      XMM15, XMM15
-			PXOR      XMM14, XMM14
 			MOVDQU    XMM0, [R12 + RDI + 8]	; XMM0 = p5 | p4 | p3 | p2
 			MOVDQU    XMM1, XMM0		; XMM1 = XMM0
-			PUNPCKLBW XMM0, XMM15		; XMM0 = p3 | p2
-			PUNPCKHBW XMM1, XMM15		; XMM1 = p5 | p4
+			PUNPCKLBW XMM0, XMM12		; XMM0 = p3 | p2
+			PUNPCKHBW XMM1, XMM12		; XMM1 = p5 | p4
 
 			MOVDQU    XMM4, [R13 + RDI + 8]	; XMM4 = p11 | p10 | p9 | p8
 			MOVDQU    XMM5, XMM4		; XMM5 = XMM4 
-			PUNPCKLBW XMM4, XMM15		; XMM4 = p9 | p8
-			PUNPCKHBW XMM5, XMM15		; XMM5 = p11 | p10
+			PUNPCKLBW XMM4, XMM12		; XMM4 = p9 | p8
+			PUNPCKHBW XMM5, XMM12		; XMM5 = p11 | p10
 
 			MOVDQU    XMM8, [R8  + RDI + 8]	; XMM10 = p17 | p16 | p15 | p14
 			MOVDQU    XMM9, XMM8		; XMM11 = XMM10
-			PUNPCKLBW XMM8, XMM15		; XMM10 = p15 | p14
-			PUNPCKHBW XMM9, XMM15		; XMM11 = p17 | p16
+			PUNPCKLBW XMM8, XMM12		; XMM10 = p15 | p14
+			PUNPCKHBW XMM9, XMM12		; XMM11 = p17 | p16
 
 			; Sumo los 9 pixeles de 2 y 3, guardo el resultado en XMM15
+			PXOR      XMM15, XMM15
 			PADDUSW   XMM15, XMM0		; XMM15 = p3 | p2
 			PADDUSW   XMM15, XMM1		; XMM15 = p3 + p5 | p2 + p4
 			PADDUSW   XMM15, XMM3		; XMM15 = p3 + p4 + p5 | p2 + p3 + p4

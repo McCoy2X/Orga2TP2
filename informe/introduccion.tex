@@ -1,7 +1,7 @@
 \section{Introducción}
 
 El objectivo del trabajo practico es utilizar el set de instrucciones SIMD para el procesamiento de imagenes.
-Para esto se nos pidio implementar 2 versiones en ASM (x86_64) de 3 filtros diferentes (Blur, Merge, HSL), ademas se nos brindo una version en C para usar como guia.
+Para esto se nos pidio implementar 2 versiones en ASM (x86\_64) de 3 filtros diferentes (Blur, Merge, HSL), ademas se nos brindo una version en C para usar como guia.
 
 Es importante destacar que las imagenes que vamos a procesar son multiplo de 4 pixeles y con un tamaño minimo de 16 pixeles, esto nos permite en nuestras implementaciones cargar de a 4 pixeles en los registros XMM sin tener que preocuparnos por los casos borde.
 Ademas el procesamiento de las imagenes se hace unicamente usando instrucciones SSE y durante el procesamiento de los mismos tratamos de mantenernos adentro de los margenes de error brindados por los test de la catedra.

@@ -1,12 +1,12 @@
 \section{Filtro 1: Blur}
 
 \subsection{Cambios}
-Para el recuperatorio decidimos hacer cambios en el codigo y comparar la version vieja del codigo con la nueva.
+Para el recuperatorio decidimos hacer cambios en el codigo.
 
 La lista de cambios esta a continuacion, con la aclaracacion de por que se hicieron los mismos:
 \noindent
 \begin{itemize}
-\item Se remplazaron las operaciones que realizaban la copia por operaciones de SIMD para aumentar la velocidad a la que se copian los pixeles, tambien se modifico el codigo el cual antes copiaba las dos filas de pixeles superiores para que solo copie una (Swapeando los punteros de R13 con R12 y luego copiando en R13 los datos de la fila inferior)
+\item Se remplazaron las operaciones que realizaban las copias por operaciones de SIMD para aumentar la velocidad a la que se copian los pixeles, tambien se modifico el codigo el cual antes copiaba las dos filas de pixeles superiores para que solo copie una (Swapeando los punteros de R13 con R12 y luego solo copiando en R13 los datos de la fila de pixeles del medio).
 \end{itemize}
 
 \subsection{Explicacion}
@@ -37,16 +37,16 @@ Esto se puede visualizar en el siguiente grafico:
 
 Donde \texttt{P} es el pixel a procesar.
 
-Antes de comenzar el ciclo incicializamos \texttt{R9} en 2 y posicionamos el puntero a la imagen en memoria en la segunda fila de pixeles.
+Antes de comenzar el ciclo incicializamos \texttt{RDI} en 0, \texttt{R9} en 2, movimos \texttt{R8} a \texttt{R10}, aumentamos \texttt{R8} en una fila y posicionamos el puntero a la imagen en memoria en la segunda fila de pixeles.
 
-Al principio de cada ciclo de \texttt{Y} movimos \texttt{R8} a \texttt{R10}, aumentamos \texttt{R8} en una fila e inicializamos el iterador en \texttt{X} (ubicado en RDI) en 0. Asi quedan los registros de los 3 grupos de pixeles:\\
+Al principio de cada ciclo copiamos en los registros los 3 grupos de pixeles y quedan de la siguiente manera:\\
 
 \noindent
 \texttt{XMM0 $\gets$ [R12 + RDI] = - $\vert$ p2 $\vert$ p1 $\vert$ p0}\\
 \texttt{XMM1 $\gets$ [R13 + RDI] = - $\vert$ p5 $\vert$ p4 $\vert$ p3}\\
 \texttt{XMM2 $\gets$ $\ $[R8  + RDI] = - $\vert$ p8 $\vert$ p7 $\vert$ p6}\\
 
-Despues desempaquetamos los pixeles de $byte$ a $word$ para poder sumar los 9 pixeles sin saturacion, hicimos una copia de cada uno para poder desempaquetar la parte inferior en un registro y la superior en otro (\texttt{XMM1 = XMM0}, \texttt{XMM3 = XMM2}, \texttt{XMM5 = XMM4}) y ademas llenamos un registro (\texttt{XMM15}) con ceros para expandir cada una de las componentes sin alterar el numero original.
+Despues desempaquetamos los pixeles de $byte$ a $word$ para poder sumar los 9 pixeles sin saturacion, hicimos una copia de cada uno para poder desempaquetar la parte inferior en un registro y la superior en otro (\texttt{XMM1 = XMM0}, \texttt{XMM3 = XMM2}, \texttt{XMM5 = XMM4}) y ademas llenamos un registro (\texttt{XMM12}) con ceros para expandir cada una de las componentes sin alterar el numero original.
 Una vez desempaquetados nos quedan los registros con los siguientes valores:\\
 
 \noindent
@@ -71,11 +71,13 @@ Luego hicimos una copia de \texttt{XMM15} en \texttt{XMM13} y la shifteamos 8 by
 Por ultimo sumamos \texttt{XMM15}, \texttt{XMM14} y \texttt{XMM13} en \texttt{XMM15} \\
 	\texttt{XMM15 $\gets$ - $\vert$ p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8} \\
 
-Para hacer la division optamos por multiplicar por $(2^{16} / 9) + 1$ y luego shiftear 16 bits a la derecha cada componente. Para eso tengo el valor por el cual voy a multiplicar en memoria precalculado, al principio del programa decidimos guardarlo en \texttt{XMM12}.
+Para hacer la division optamos por multiplicar por $(2^{16} / 9) + 1$ y luego shiftear 16 bits a la derecha cada componente. Para eso tengo el valor por el cual voy a multiplicar en memoria precalculado, al principio del programa decidimos guardarlo en \texttt{XMM11}.
 Luego, hicimos una copia de \texttt{XMM15} en \texttt{XMM14} y multiplicamos por \texttt{XMM12} guardando la parte superior de la mutiplicacion en \texttt{XMM15} y la inferior en \texttt{XMM14}. Luego empaquetamos los dos valores juntos como doubleword y los guardamos en \texttt{XMM14} y shifteamos 16 bits a la derecha.
 Por ultimo empaquetamos los valores obtenidos a words y luego a bytes, posteriorment los guardamos en la posicion de memoria del pixel actual.
 
-Aumentamos en 4 el iterador en \texttt{X} y comparamos con el tamaño en bytes de una linea de pixeles, si es menor iteramos nuevamente en \texttt{X}. En caso de que fuese mayor o igual, hicimos 2 copias de las lineas de pixeles siguientes (las cuales eran necesarias para poder operar la siguiente fila).
+Aumentamos en 4 el iterador en \texttt{X} y comparamos con el tamaño en bytes de una linea de pixeles, si es menor iteramos nuevamente. En caso de que fuese mayor o igual, copiamos cambiamos los punteros de \texttt{R12} y \texttt{R13} y luego copiamos en R13 los pixeles de la siguiente fila (las cuales seran necesarias para poder operar la siguiente fila).
+
+Para terminar copiamos \texttt{R8} en \texttt{R10}, movemos \texttt{R8} una fila de pixeles, reseteamos el iterador X \texttt{RDI}, incrementamos el iterador en Y \texttt{R9} y si el iterador de Y es menos a la altura de la imagen iteramos nuevamente.
 
 \subsection{Implementacion 2}
 Para la segunda implementacion se nos pidio trabajar de a 4 pixeles por iteracion.
@@ -97,9 +99,9 @@ Al igual que la primer implementacion, necesitaremos los mismos 6 registros de p
 	\includegraphics[scale=0.5]{images/BlurASM2_0}
 \end{figure}
 
-Antes de comenzar el ciclo iniciamos el iterador en \texttt{Y} (\texttt{R9}) y posicionamos el puntero a la imagen en la segunda fila de pixeles. \\
+Antes de comenzar el ciclo incicializamos \texttt{RDI} en 0, \texttt{R9} en 2, movimos \texttt{R8} a \texttt{R10}, aumentamos \texttt{R8} en una fila y posicionamos el puntero a la imagen en memoria en la segunda fila de pixeles.
 
-Al igual que en la primera implementacion nos guardamos una copia del puntero a la fila que vamos a incrementar y movemos \texttt{R8} a la siguiente fila de pixeles. Ademas inicializamos el iterador de \texttt{X} (\texttt{RDI}) en 0. Por ultimo cargamos los 6 pixeles a sus respectivos registros:\\
+Luego cargamos los 6 pixeles a sus respectivos registros:\\
 
 \noindent
 \texttt{XMM0 $\ \gets$ p3 $\ \vert$ p2 $\ \vert$ p1 $\ \vert$ p0} \\
@@ -157,7 +159,27 @@ Como podemos apreciar, en este caso las cuentas tambien responden a lo presentad
 Una vez terminado el procesamiento de pixeles, comparamo el iterador con la cantidad de pixeles en una fila y repetimos hasta llegar hasta los ultimos 16 bytes de la fila, estos ultimos 16 bytes los cargamos en solo 3 registros \texttt{XMM} y los procesamos al igual que la primera parte del ciclo para asegurarme de no pasarnos. Al final del ciclo hacemos las copias pertinentes, incrementamos el iterador de filas y revisamos si llegamos al final. \\
 
 \subsection{Resultados}
+Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) para poder comparar la performance, vamos a usar la imagen de $lena$ brindada por la catedra (Resolucion 160x160). Se ejecutara cada implementacion del algoritmo 100 veces y luego se calculara el tiempo minimo, maximo y promedio. A continuacion graficamos los tiempos en un grafico de barras que esta a continuacion:
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.45]{images/blur_comparation}
+\end{figure}
+
+Con esto podemos ver que la implementacion ASM2 es un poco mas rapida que las otras implementaciones.
+
+Revisando el codigo podemos ver que el tamaño de la imagen solo deberia modificar cantidad de pixeles a procesar aumentando el tiempo de ejecucion solo por que se necesita hacer mas iteraciones, tambien podemos ver que el algoritmo es independiente del color de los pixeles a procesar.
+
+Para la reentrega se hicieron algunos cambios en el codigo que se supone que deberian mejorar la performance (Ver lista de cambios), decidimos correr el test explicado anteriormente el codigo nuevo y el codigo viejo para comfirmar que los cambios propuestos cumplan con su objetivo. En el siguiente grafico graficaron los tiempos maximos, minimo y promedio de ejecucion de la implementaciones de ASM.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.45]{images/blur_comparationOLD}
+\end{figure}
+
+
+
+\newpage
 
 % Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320). Cada tamaño se ejecuta 100 veces, despues se saca un promedio y se lo grafica junto con el maximo y el minimo. La metodologia adoptada para evaluar la eficacia de las implementaciones es tomar la cantidad de ciclos que tarda en correr cada una de las implementaciones, esto lo hacemos mediante la libreria \texttt{rdtsc.h}, las pruebas van a ser ejecutadas en un \texttt{Intel Core i7 4700MQ}. Estas condiciones de prueba se mantendran durante el resto del informe y para todos los filtros.
 
@@ -188,7 +210,9 @@ Una vez terminado el procesamiento de pixeles, comparamo el iterador con la cant
 % \end{figure}
 
 \subsection{Conclusion}
+Podemos concluir que en el caso de la utilizacion de instrucciones SIMD para la aplicacion del algoritmo de blur se puede ver que operar de a varios pixeles mejora un poco con respecto a operar de a un pixel pero al mismo tiempo tambien complica considerablemente el codigo que se debio implementar en nuestro caso.
 
+Igual la simple implementacion de instrucciones SIMD comparandola con el codigo C compilado se puede notar una diferencia conciderable en cuanto a la cantidad de ciclos de reloj usados por el mismo.
 
 % Luego de la experimentacion podemos concluir que ASM2 es el mas rapido en general. \\
 

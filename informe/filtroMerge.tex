@@ -1,5 +1,18 @@
 \section{Filtro 2: Merge}
 
+\subsection{Cambios}
+Para el recuperatorio decidimos hacer cambios en el codigo.
+
+La lista de cambios esta a continuacion, con la aclaracacion de por que se hicieron los mismos:
+\noindent
+\begin{itemize}
+\item Se elimino uno de los iteradores de ciclo para reducir la cantidad de saltos condicionales y mejorar la performance del codigo.
+\item En la primera implementacion cambio la utilizacion de CALL addPixels por un macro debido a que los calls rompen el pipeline y requieren operaciones extra.
+\item Se cambio la escritura a disco de usar PEXTRD, PINSRD y luego hacer MOVDQU de un solos registro XMM a hacer MOVD del registro \texttt{XMM0} luego de cada llamada del macro addPixels
+\end{itemize}
+
+En la experimentacion se ve que los cambios no producen una mejora de performance notable pero decidimos dejarlos por que ayudaban a hacer el codigo mas claro para leer y por que a pesar de que fueron optimizaciones fallidas concideramos que los resultados inesperados que devolvio la experimentacion son importantes.
+
 \subsection{Explicacion}
 El filtro $merge$ consiste en tomar 2 imagenes del mismo tamaño y un parametro (llamdo \texttt{value} en el enunciado) de tipo $float$ entre 0 y 1, multiplicar las componetes de la primer imagen por \texttt{value} y los de la segunda por \texttt{1 - value} y sumar los pixeles de ambas para crear una nueva imagen. \\
 
@@ -8,14 +21,14 @@ Para la primer implementacion se nos pidio trabajar con valores de tipo $float$,
 
 Ya que la cantidad de pixeles por imagen siempre va a ser un multiplo de 4 segun el enunciado, decidimos tomar de a 4 pixeles de la memoria para trabajar con los mismos, esto nos permitio simplificar el ciclo y operar sin tener que preocuparnos por excedernos del area de memoria alocada a la imagen.\\
 
-Para procesar los pixeles del merge utilizamos 2 registros \texttt{XMM} para guardar los 4 pixeles como bytes que obtenemos de la memoria, y 2 registros mas para guardar copias de los mismos. Ademas como utilizamos una funcion auxiliar tambien precisamos de 4 registros \texttt{XMM} mas para poder guardar los resultados de la funcion. Por ultimo, tenemos \texttt{value} y \texttt{1 - value} guardados en los registros \texttt{XMM15} y \texttt{XMM14} respectivamente. Ademas de estos registros, se emplearon tambien los siguientes de proposito general:\\
+Para procesar los pixeles del merge utilizamos 2 registros \texttt{XMM} para guardar los 4 pixeles como bytes que obtenemos de la memoria, y 2 registros mas para guardar copias de los mismos. Ademas como utilizamos un macro tambien precisamos de 4 registros \texttt{XMM} mas para poder guardar los resultados de la funcion. Por ultimo, tenemos \texttt{value} y \texttt{1 - value} guardados en los registros \texttt{XMM15} y \texttt{XMM14} respectivamente. Ademas de estos registros, se emplearon tambien los siguientes de proposito general:\\
 
 \noindent
 \begin{itemize}
 	\item \texttt{RDX} puntero a la primera imagen
 	\item \texttt{RCD} puntero a la segunda imagen
-	\item \texttt{R9} iterador en \texttt{Y}
-	\item \texttt{R8} iterador en \texttt{X}
+	\item \texttt{R9} cantidad de bytes totales de la imagen
+	\item \texttt{R8} contador
 \end{itemize}
 
 Esta distribucion de registros reponde al siguiente grafico:
@@ -25,21 +38,21 @@ Esta distribucion de registros reponde al siguiente grafico:
 	\includegraphics[scale=0.5]{images/MergeASM1_0}
 \end{figure}
 
-Antes de empezar a recorrer la imagen, para asignar los valores correctos de \texttt{XMM14} y \texttt{XMM15} utilizamos el dato \texttt{value} original almacenado en \texttt{XMM0}. Este valor fue copiado mediante un operacion de shuffle hacia \texttt{XMM15}, esta operacion copiaba \texttt{value} a todas las componentes de \texttt{XMM15}. Para poder calcular \texttt{XMM14} alcanzo con mover al mismo una constante almacenada en memoria que tuviese \texttt{1.0} en los 4 $float$ y posteriormente restarle el contenido de \texttt{XMM15}. Finalmente tenemos en \texttt{XMM14} y \texttt{XMM15}:\\
+Antes de empezar a recorrer la imagen, para asignar los valores correctos de \texttt{XMM14} y \texttt{XMM15} utilizamos el dato \texttt{value} original almacenado en \texttt{XMM0}. Esto lo hacemos mediante una operacion de shuffle hacia \texttt{XMM15}, la misma copia \texttt{value} a todas las componentes de \texttt{XMM15}. Para poder calcular \texttt{XMM14} alcanzo con mover al mismo una constante almacenada en memoria que tuviese \texttt{1.0} en los 4 $float$ y posteriormente restarle el contenido de \texttt{XMM15}. Finalmente tenemos en \texttt{XMM14} y \texttt{XMM15}:\\
 
 \noindent
 \texttt{XMM14 $\gets$ 1 - value $\vert$ 1 - value $\vert$ 1 - value $\vert$ 1 - value}\\
 \texttt{XMM15 $\gets\ \ $ value $\ \ \vert\ \ $ value $\ \ \vert\ \ $ value $\ \ \vert\ \ $ value}\\
 
-Para poder movernos por la imagen empleamos dos ciclos anidados, el primero de ellos nos permite, junto con \texttt{R9}, iterar sobre el eje \texttt{Y}, mientras que el ciclo interno nos permite movernos con facilidad sobre el eje \texttt{X} mediante \texttt{R8}. Antes de comenzar a iterar en el ciclo principal, incializamos ambos iteradores en 0, y si llegamos al final del ciclo interno (es decir, iteramos sobre todo el eje \texttt{X} para la fila actual) colocamos el iterador de \texttt{X} en 0. Al comienzo de cada ciclo de \texttt{X}, movemos hacia los registros \texttt{XMM0} y \texttt{XMM1} los datos de los pixeles a procesar de la primer y segunda imagen respectivamente, ademas copiamos cada una en \texttt{XMM2} y \texttt{XMM3}, luego de esto procedimos a llamar a la funcion auxiliar \texttt{addPixels} 4 veces. Al finalizar los llamados, tenemos en \texttt{XMM4} los 4 pixeles procesados, lo unico restante fue volcarlos en memoria. Una vez que los pixeles se encuentran en memoria, tenemos que aumentar el iterador de \texttt{X} en 16 bytes, y en caso de haber llegado al final de la fila, colocar el mismo en 0 e incrementar el de \texttt{Y}. Si ya llegue al final de la imagen, termino el ciclo principal de la implementacion y procedo a retornar de la funcion.
+Para poder movernos por la imagen empleamos un ciclo, iteramos sobre el la imagen de a 16 bytes usando \texttt{R8} como contador. Antes de comenzar a iterar incializamos \texttt{R8} en 0. Al comienzo de cada ciclo, movemos hacia los registros \texttt{XMM0} y \texttt{XMM1} los datos de los pixeles a procesar de la primer y segunda imagen respectivamente, ademas copiamos cada una en \texttt{XMM2} y \texttt{XMM3}, luego de esto procedimos a llamar al macro \texttt{addPixels} 4 veces. Al finalizar los llamados, tenemos en \texttt{XMM4} los 4 pixeles procesados, lo unico restante fue volcarlos en memoria. Una vez que los pixeles se encuentran en memoria, tenemos que aumentar el contador 16 bytes, tambien aumentamos los punteros a la imagenes por el mismo valor y luego comparo \texttt{R8} con \texttt{R9}. Si ya llegue al final de la imagen, termino el ciclo de la implementacion y procedo a retornar de la funcion.
 
-La funcion \texttt{addPixels} es una funcion auxiliar la cual hace la aritmetica necesaria para poder mergear las imagenes, esta funcion toma los valores de \texttt{XMM2} y \texttt{XMM3} y los copia hacia \texttt{XMM0} y \texttt{XMM1} respectivamente, luego procede a desempaquetarlos a doubleword utilizando el registro \texttt{XMM10} el cual contiene 0 en todas sus componentes. Una vez desempaquetados los valores, se procede a convertirlos a tipo $float$ para poder realizar el producto con \texttt{XMM14} (\texttt{1-value}) y \texttt{XMM15} (\texttt{value}). Entonces tenemos:
+El macro \texttt{addPixels} es una funcion auxiliar la cual hace la aritmetica necesaria para poder mergear las imagenes, esta funcion toma los valores de \texttt{XMM2} y \texttt{XMM3} y los copia hacia \texttt{XMM0} y \texttt{XMM1} respectivamente, luego procede a desempaquetarlos a doubleword utilizando el registro \texttt{XMM10} el cual contiene 0 en todas sus componentes. Una vez desempaquetados los valores, se procede a convertirlos a tipo $float$ para poder realizar el producto con \texttt{XMM14} (\texttt{1-value}) y \texttt{XMM15} (\texttt{value}). Entonces tenemos:
 
 \noindent
 \texttt{XMM0 $\gets$ a * value $\vert$ r * value $\vert$ g * value $\vert$ b * value}
 \texttt{XMM1 $\gets$ a * (1 - value) $\vert$ r * (1 - value) $\vert$ g * (1 - value) $\vert$ b * (1 - value)}
 
-Con estos valores en los registros, lo unico restante es sumarlos, convertirlos nuevamente a entero, y empaquetarlos a byte. Antes de finalizar la funcion, shifteamos los registros \texttt{XMM2} y \texttt{XMM3} 4 bytes a la derecha, asi en el siguiente llamado a la funcion ya van a estar los siguientes pixeles a procesar en el lugar correcto.
+Con estos valores en los registros, lo unico restante es sumarlos, convertirlos nuevamente a entero, y empaquetarlos a byte. Antes de finalizar la funcion, shifteamos los registros \texttt{XMM2} y \texttt{XMM3} 4 bytes a la derecha, asi en el siguiente llamado al macro ya van a estar los siguientes pixeles a procesar en el lugar correcto.
 
 \subsection{Implementacion 2}
 Para la segunda implementacion se no pidio trabajar con enteros procesando la mayor cantidad de enteros posibles por iteracion. Al igual que en la primera implementacion trabajamos de a 4 pixeles al mismo tiempo por que nos permite iterar de manera segura. Al igual que antes vamos a emplear los registros \texttt{XMM14} y \texttt{XMM15} para guardar los valores por los cuales vamos a multiplicar los pixeles. Para calcularlos movimos \texttt{value} a XMM15, luego aplicamos un shuffle para que los 4 floats de \texttt{XMM15} \texttt{value}, luego movimos a \texttt{XMM14} una constante de $float$ almacenada en memoria la cual contenia \texttt{8192.0} en cada una de sus componentes, este registro fue multiplicado por \texttt{XMM15} almacenando el resultado del producto en \texttt{XMM15}, para obtener el \texttt{1 - value} lo unico necesario fue restarle a \texttt{XMM14} el contenido de \texttt{XMM15}. Finalmente tenemos:\\
@@ -58,7 +71,7 @@ Ademas de estos registros vamos a emplear los mismos registros de proposito gene
 	\includegraphics[scale=0.5]{images/MergeASM2_0}
 \end{figure}
 
-La estructura de la primera implementacion se mantuvo igual, es decir, se preservo el ciclo anidado y el uso de iteradores, esto significa que las misma precauciones respecto a los mismos tomadas anteriormente aplican nuevamente en ese caso. Una vez dentro del ciclo de \texttt{X} procedimos a mover hacia \texttt{XMM0} y \texttt{XMM4} los grupos de pixeles de la primera y segunda imagen. Estos fueron desempaquetados a doubleword, quedando de la siguiente forma:
+La estructura de la primera implementacion se mantuvo igual, es decir, se preservo el ciclo y el uso del contador, esto significa que las misma precauciones respecto a los mismos tomadas anteriormente aplican nuevamente en ese caso. Una vez dentro del ciclo procedimos a mover hacia \texttt{XMM0} y \texttt{XMM4} los grupos de pixeles de la primera y segunda imagen respectivamente. Estos fueron desempaquetados a doubleword, quedando de la siguiente forma:
 
 \noindent
 \texttt{XMM0 $\gets$ p0}\\
@@ -86,7 +99,32 @@ Al final tenemos:\\
 Para terminar solo fue necesario sumarlos y moverlos a memoria.
 
 \subsection{Resultados}
+Para la experimentacion decicimos correr las 3 implementaciones usando la imagen de $lena$ y $colores$ brindadas por la catedra (ambas en una resolucion de 160x160). Se ejecuta cada una de las implementaciones 100 veces y se obtiene el tiempo minimo, maximo y promedio de cada una. Luego pasamos a graficar los resultados para ver cual es la mas rapida.
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.45]{images/merge_comparation}
+\end{figure}
+
+Con esto podemos ver claramente que la implementacion ASM2 corre mas rapida que las otras.
+
+Tambien decidimos correr la implementacion de la primera entrega y compararla con la nueva para ver si los cambios propuestos mejoraron la performance.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.45]{images/merge_comparationOLD}
+\end{figure}
+
+Esta experimentacion nos sorprendio ya que la eliminacion de branches tanto con los calls como con los jumps practicamente no cambio el tiempo de ejecucucion del programa, en la primera implementacion el cambio que vemos es principalmente por la manera en la que ahora hacemos el pasaje a memoria.
+
+Luego de descubrir que la operacion PEXTRD y PINSRD son operaciones caras (Requieren varios ciclos de clock) decidimos probar si era mas rapido usar estas instrucciones o hacer 4 copias a memoria directamente desde el registro XMM usando MOVD.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.45]{images/merge_extractmov}
+\end{figure}
+
+Con esto podemos ver que las operaciones de extraccion e incercion de codigo son mas caras que hacer los 4 accesos a memoria.
 
 % Para la experimentacion vamos a correr las 3 implementaciones (La version de $C$ compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320), se corren 100 veces cada tamaño y despues se saca un promedio y se grafica el maximo, el minimo y el promedio.
 
@@ -116,6 +154,6 @@ Para terminar solo fue necesario sumarlos y moverlos a memoria.
 % \end{figure}
 
 \subsection{Conclusion}
+Finalmente podemos concluri que la implementacion de ASM2 es la mas rapida de todas ya que al trabajar con bytes en vez de floats nos permite aprobecharnos mucho mas de las instrucciones SIMD reduciendo la cantidad de operaciones logradas.
 
-
-% Al igual que en el primer filtro, las implementacion de $Assembler$ terminaron siendo mas veloces que la de $C$. La consistencia de los resultados tambien nos lleva a concluir que el costo en tiempo de hacer las conversiones en la primer implementacion es considerable, ya que la segunda version, al estar realizada sobre enteros minimizando las operaciones de punto flotante, tardo considerablemente menos.
+% Al igual que en el primer filtro, las implementacion de $Assembler$ terminaron siendo mas veloces que la de $C$. La consistencia de los resultados tambien nos lleva a concluir que el costo en tiempo de hacer las conversiones en la primer implementacion es considerable, ya que la segunda version, al estar realizada sobre enteros minimizando las operaciones de punto flotante, tardo considerablemente menos.	

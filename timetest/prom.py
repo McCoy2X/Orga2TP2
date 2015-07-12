@@ -1,56 +1,54 @@
 import csv
+from os import listdir
+from os.path import isfile, join
 
 class Data:
 	n = ""
 	size = ""
+	imp = ""
 	min = float("inf")
 	max = 0
 	sum = 0
 	count = 0
 
-files = ["c.blur.lena", "asm1.blur.lena", "asm2.blur.lena", 
-"c.blur.colores", "asm1.blur.colores", "asm2.blur.colores", 
-"c.blur.rojo", "asm1.blur.rojo", "asm2.blur.rojo", 
-"c.blur.verde", "asm1.blur.verde", "asm2.blur.verde", 
-"c.blur.azul", "asm1.blur.azul", "asm2.blur.azul", 
-"c.merge.lena", "asm1.merge.lena", "asm2.merge.lena", 
-"c.merge.colores", "asm1.merge.colores", "asm2.merge.colores", 
-"c.merge.rojo", "asm1.merge.rojo", "asm2.merge.rojo", 
-"c.merge.verde", "asm1.merge.verde", "asm2.merge.verde", 
-"c.merge.azul", "asm1.merge.azul", "asm2.merge.azul",
-"c.hsl.lena", "asm1.hsl.lena", "asm2.hsl.lena", 
-"c.hsl.colores", "asm1.hsl.colores", "asm2.hsl.colores", 
-"c.hsl.rojo", "asm1.hsl.rojo", "asm2.hsl.rojo", 
-"c.hsl.verde", "asm1.hsl.verde", "asm2.hsl.verde", 
-"c.hsl.azul", "asm1.hsl.azul", "asm2.hsl.azul"]
+#files = [ f for f in listdir("./data") if isfile(join("./data",f)) ]
+
+files = [	"blur.comparation.csv", "merge.comparation.csv", "hsl.comparation.csv",
+			"blur.comparationOLD.csv", "merge.comparationOLD.csv",
+			"hsl.comparationC.csv", "hsl.comparationASM1.csv", "hsl.comparationASM2.csv"]
+
+#files = [ "merge.comparation.csv" ]
 
 for f in files:
 	dataList = []
-	with open("data/" + f + ".csv", "rb") as csvfile:
+	with open("data/" + f, "rb") as csvfile:
 		reader = csv.reader(csvfile, delimiter=",")
-		lastn = 0
+		lastd = Data();
+		lastd.n = -1;
 		d = Data()
 		for row in reader:
 			if(row[0] != "N"):
 				n = int(row[0])
 				clock = int(row[2])
 
-				if(lastn != n):
-					dataList.append(d);
+				if(lastd.n != -1 and (lastd.size != row[1] or lastd.imp != row[6])):
+					dataList.append(d)
 					d = Data()
 
 				d.n = row[0]
 				d.size = row[1]
+				d.imp = row[6]
 				d.min = min(d.min, clock)
 				d.max = max(d.max, clock)
 				d.sum += clock
 				d.count += 1
 
-				lastn = n
-		dataList.append(d);
+				lastd = d
+	
+	dataList.append(d)
 
-	with open("prom/" + f + ".csv", 'wb') as csvfile:
+	with open("prom/" + f, 'wb') as csvfile:
 	    writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-	    writer.writerow(["N"] + ["Size"] + ["Min"] + ["Max"] + ["Sum"] + ["Average"]);
+	    writer.writerow(["N"] + ["Size"] + ["Min"] + ["Max"] + ["Sum"] + ["Average"] + ["Implementation"])
 	    for data in dataList:
-	    	writer.writerow([data.n] + [data.size] + [data.min] + [data.max] + [data.sum] + [data.sum / data.count])
+	     	writer.writerow([data.n] + [data.size] + [data.min] + [data.max] + [data.sum] + [data.sum / data.count] + [data.imp])

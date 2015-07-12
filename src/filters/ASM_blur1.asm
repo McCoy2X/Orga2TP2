@@ -37,7 +37,7 @@ ASM_blur1:
 	MOV  R15D, ESI
 
 	; Guardo el dosk
-	MOVDQU XMM12, [dosk]
+	MOVDQU XMM11, [dosk]
 
 	; Calculo el width en bytes
 	MOV  RAX, 4
@@ -68,32 +68,33 @@ ASM_blur1:
 		CMP RDI, R14
 		JL  .get
 
+	; Limpio XMM12 para desenpacketar
+	PXOR XMM12, XMM12
+
 	; Ciclo
-	ADD R8, R14	; Posiciono *data en la segunda fila 
-	MOV R10, R8 ; Guardo el R8 anterior
-	ADD R8, R14 ; Avanzo una fila
-	MOV RDI, 0  ; Iterador en x
-	MOV R9, 2	; Iterador en y
+	ADD  R8, R14	; Posiciono *data en la segunda fila 
+	MOV  R10, R8 ; Guardo el R8 anterior
+	ADD  R8, R14 ; Avanzo una fila
+	MOV  RDI, 0  ; Iterador en x
+	MOV  R9, 2	; Iterador en y
 	.ciclo:
 
-		; Clear XMM15 to unpack with ceroes
-		PXOR      XMM15, XMM15
 		; Tomo los 9 pixeles de memoria
 		MOVDQU    XMM0, [R12 + RDI]		; XMM0 = x | p2 | p1 | p0
 		MOVDQU    XMM1, XMM0			; XMM1 = XMM0
-		PUNPCKLBW XMM0, XMM15			; XMM0 = p1 | p0
-		PUNPCKHBW XMM1, XMM15			; XMM1 = xx | p2
+		PUNPCKLBW XMM0, XMM12			; XMM0 = p1 | p0
+		PUNPCKHBW XMM1, XMM12			; XMM1 = xx | p2
 
 		MOVDQU    XMM2, [R13 + RDI]		; XMM2 = x | p5 | p4 | p3
 		MOVDQU    XMM3, XMM2			; XMM3 = XMM2
-		PUNPCKLBW XMM2, XMM15			; XMM2 = p4 | p3
-		PUNPCKHBW XMM3, XMM15			; XMM3 = xx | p5
+		PUNPCKLBW XMM2, XMM12			; XMM2 = p4 | p3
+		PUNPCKHBW XMM3, XMM12			; XMM3 = xx | p5
 
 		MOVDQU    XMM4, [R8  + RDI - 4]	; XMM4 = p8 | p7 | p6 | x
 		PSRLDQ    XMM4, 4				; XMM4 = x | p8 | p7 | p6
 		MOVDQU    XMM5, XMM4			; XMM5 = XMM4
-		PUNPCKLBW XMM4, XMM15			; XMM4 = p7 | p6
-		PUNPCKHBW XMM5, XMM15			; XMM5 = xx | p8
+		PUNPCKLBW XMM4, XMM12			; XMM4 = p7 | p6
+		PUNPCKHBW XMM5, XMM12			; XMM5 = xx | p8
 
 		; Sumo los 9 pixeles
 		MOVDQU    XMM15, XMM0		; XMM15 = p1 | p0
@@ -109,8 +110,8 @@ ASM_blur1:
 
 		; Divido por 9
 		MOVDQU    XMM14, XMM15		; XMM14 = XMM15
-		PMULHW    XMM15, XMM12		; High of psum * dosk
-		PMULLW    XMM14, XMM12		; Low of psum * dosk
+		PMULHW    XMM15, XMM11		; High of psum * dosk
+		PMULLW    XMM14, XMM11		; Low of psum * dosk
 		PUNPCKLWD XMM14, XMM15		; XMM15 = psum
 		PSRLD     XMM14, 16			; XMM14 >> 16
 		PACKUSDW  XMM14, XMM15		; XMM14 = psum
@@ -127,7 +128,7 @@ ASM_blur1:
 
 		; Recorro y copio la fila de pixeles siguientes, swapeo los punteros (Y copio )
 		MOV RDI, 0 		; Iterador
-		MOV RSI, R8 	; Puntero a segunda fila
+		MOV RSI, R8 	; Punero a segunda fila
 		XCHG R13, R12	; Exchange R13 and R12 pointers to allocated memory
 		.cicloget:
 			MOVDQU XMM0, [RSI + RDI]
