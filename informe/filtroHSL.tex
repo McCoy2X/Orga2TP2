@@ -308,7 +308,26 @@ Lo unico restante fue aplicar cada una de las mascaras formadas anteriormente a 
 Con estos registros, lo unico faltante fue realizar las operaciones aritmeticas indicadas en la funcion $RGB$, mencionada al comienzo del esta seccion, y unificar el resultado con el canal $alpha$ del registro \texttt{XMM0}. Para hacer esto alcanzo con quedarnos unicamente con la componente menos significtiva y juntarla mediante un \texttt{OR} con el resultado final de $RGB$. Esto nos da el resultado final de la conversion, el siguiente paso fue convertir los numeros de tipo $float$ de 32 bits a $uint$ de 8 bits, para hacer esto basto con convertir de $float$ a $int$ de 32 bits via la instruccion \texttt{CVTPS2DQ} y empaquetar el resultado de 32 bits a 8 bits mediante las instrucciones \texttt{PACKUSDW} y \texttt{PACKUSWB}, en ese orden. Una vez concluido el empaquetado, procedimos a volcar dicho resultado a la misma posicion de memoria a partir de la cual iniciamos el ciclo.
 
 \subsection{Resultados}
+Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) para poder comparar la performance, vamos a usar la imagen de $lena$ brindada por la catedra (Resolucion 160x160). Se ejecutara cada implementacion del algoritmo 100 veces y luego se calculara el tiempo (Usando el time stamp counter del procesador y la funcion de C brindada por la catedra) minimo, maximo y promedio (Sumando todos los tiempos tomados y diviendo por el la cantidad de iteraciones). Luego pasamos a graficar los resultados para ver la performance de las mismas.
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.5]{images/hsl_comparation}
+\end{figure}
+
+Luego decidimos probar el algoritmo con diferentes imagenes para testear si los saltos condicionales impactan en el rendimiento de las implementaciones.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.5]{images/hsl_comparationC}
+	\caption{C}
+	\includegraphics[scale=0.5]{images/hsl_comparationASM1}
+	\caption{ASM1}
+	\includegraphics[scale=0.5]{images/hsl_comparationASM2}
+	\caption{ASM2}
+\end{figure}
+
+\newpage
 
 % Al igual que con los dos casos anteriores, empezamos corriendo la version de $C$ con optimizaciones de nivel 3, junto con la imagen $lena$ brindada por la catedra, se tomaron cien muestras con versiones de la imagen que fuesen multiplos de 16x16, hasta llegar a 320x320. Aqui se encuentran graficados el maximo, minimo y el promedio:\\
 
@@ -347,6 +366,8 @@ Con estos registros, lo unico faltante fue realizar las operaciones aritmeticas 
 % Aqui podemos ver que el valor de \texttt{HH} no afecta en gran manera al rendimiento, ya que la cantidad de ciclos se mantiene relativamente constante independientemente del \texttt{HH}, y al igual que el primer test, la implementacion de $C$ sigue teniendo mejor rendimiento.
 
 \subsection{Conclusion}
+En conclusion podemos ver que la version de C es la mas rapida, suponemos que esto es asi debido a que la prediccion de saltos del procesador es lo suficientemente buena como para que sea mas rapido que hacer las cosas usando SIMD y procesando todo usando mascaras.
 
+Tambien podemos ver tambien que los saltos afectan la consistencia del algoritmo ya que la implementacion ASM2 posee tiempos de ejecucion mucho mas consistentes, en cambio la de C y ASM1 (La cual posee funciones con saltos) poseen variaciones en los tiempos de ejecucion.
 
 % Este filtro trajo varias sorpresas respecto al rendimiento, si bien los condicionales afectaron en mayor o menor medida a la implementacion en $C$, esta termino siendo la mejor en practicamente todos los casos probados. Consideramos que esto se debe a que el trabajo que realiza el filtro no era amigable al paralelismo, es decir, muchas veces se realizaban calculos que luego terminan siendo filtrado por alguna mascara.

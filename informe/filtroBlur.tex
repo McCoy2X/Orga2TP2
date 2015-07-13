@@ -159,7 +159,7 @@ Como podemos apreciar, en este caso las cuentas tambien responden a lo presentad
 Una vez terminado el procesamiento de pixeles, comparamo el iterador con la cantidad de pixeles en una fila y repetimos hasta llegar hasta los ultimos 16 bytes de la fila, estos ultimos 16 bytes los cargamos en solo 3 registros \texttt{XMM} y los procesamos al igual que la primera parte del ciclo para asegurarme de no pasarnos. Al final del ciclo hacemos las copias pertinentes, incrementamos el iterador de filas y revisamos si llegamos al final. \\
 
 \subsection{Resultados}
-Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) para poder comparar la performance, vamos a usar la imagen de $lena$ brindada por la catedra (Resolucion 160x160). Se ejecutara cada implementacion del algoritmo 100 veces y luego se calculara el tiempo minimo, maximo y promedio. A continuacion graficamos los tiempos en un grafico de barras que esta a continuacion:
+Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) para poder comparar la performance, vamos a usar la imagen de $lena$ brindada por la catedra (Resolucion 160x160). Se ejecutara cada implementacion del algoritmo 100 veces y luego se calculara el tiempo (Usando el time stamp counter del procesador y la funcion de C brindada por la catedra) minimo, maximo y promedio (Sumando todos los tiempos tomados y diviendo por el la cantidad de iteraciones). A continuacion graficamos los tiempos en un grafico de barras que esta a continuacion:
 
 \begin{figure}[h!]
 	\centering
@@ -176,8 +176,6 @@ Para la reentrega se hicieron algunos cambios en el codigo que se supone que deb
 	\centering
 	\includegraphics[scale=0.45]{images/blur_comparationOLD}
 \end{figure}
-
-
 
 \newpage
 
