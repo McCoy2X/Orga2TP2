@@ -7,8 +7,8 @@ La lista de cambios esta a continuacion, con la aclaracacion de por que se hicie
 \noindent
 \begin{itemize}
 \item Se elimino uno de los iteradores de ciclo para reducir la cantidad de saltos condicionales y mejorar la performance del codigo.
-\item En la primera implementacion cambio la utilizacion de CALL addPixels por un macro debido a que los calls rompen el pipeline y requieren operaciones extra.
-\item Se cambio la escritura a disco de usar PEXTRD, PINSRD y luego hacer MOVDQU de un solos registro XMM a hacer MOVD del registro \texttt{XMM0} luego de cada llamada del macro addPixels
+\item En la primera implementacion cambio la utilizacion de \texttt{CALL addPixels} por un macro debido a que los calls rompen el pipeline y requieren operaciones extra.
+\item Se cambio la escritura a disco de usar \texttt{PEXTRD}, \texttt{PINSRD} y luego hacer MOVDQU de un solos registro \texttt{XMM} a hacer \texttt{MOVD} del registro \texttt{XMM0} luego de cada llamada del macro addPixels
 \end{itemize}
 
 En la experimentacion se ve que los cambios no producen una mejora de performance notable pero decidimos dejarlos por que ayudaban a hacer el codigo mas claro para leer y por que a pesar de que fueron optimizaciones fallidas concideramos que los resultados inesperados que devolvio la experimentacion son importantes.
