@@ -307,27 +307,40 @@ Lo unico restante fue aplicar cada una de las mascaras formadas anteriormente a 
 
 Con estos registros, lo unico faltante fue realizar las operaciones aritmeticas indicadas en la funcion $RGB$, mencionada al comienzo del esta seccion, y unificar el resultado con el canal $alpha$ del registro \texttt{XMM0}. Para hacer esto alcanzo con quedarnos unicamente con la componente menos significtiva y juntarla mediante un \texttt{OR} con el resultado final de $RGB$. Esto nos da el resultado final de la conversion, el siguiente paso fue convertir los numeros de tipo $float$ de 32 bits a $uint$ de 8 bits, para hacer esto basto con convertir de $float$ a $int$ de 32 bits via la instruccion \texttt{CVTPS2DQ} y empaquetar el resultado de 32 bits a 8 bits mediante las instrucciones \texttt{PACKUSDW} y \texttt{PACKUSWB}, en ese orden. Una vez concluido el empaquetado, procedimos a volcar dicho resultado a la misma posicion de memoria a partir de la cual iniciamos el ciclo.
 
+\newpage
 \subsection{Resultados}
-Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) para poder comparar la performance, vamos a usar la imagen de $lena$ brindada por la catedra (Resolucion 160x160). Se ejecutara cada implementacion del algoritmo 100 veces y luego se calculara el tiempo (Usando el time stamp counter del procesador y la funcion de C brindada por la catedra) minimo, maximo y promedio (Sumando todos los tiempos tomados y diviendo por el la cantidad de iteraciones). Luego pasamos a graficar los resultados para ver la performance de las mismas.
+Al igual que con $blur$ y $merge$, decidimos emplear la misma metodologia para poder medir la eficiencia de las implementaciones. Los resultados obtenidos fueron:
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.45]{images/hsl_comparation}
 \end{figure}
 
-Luego decidimos probar el algoritmo con diferentes imagenes para testear si los saltos condicionales impactan en el rendimiento de las implementaciones.
+Estos resultados nos sorprendieron ampliamente, despues de ver los de $blur$ y $merge$, pero estos tienen sentido. A diferencia de los otros filtros, este no se caracteriza por su linearidad ya que en las diferentes etapas del mismo se encuentran una gran cantidad de condicionales, esto nos obligo a tener una gran cantidad de mascaras y una aritmetica demasiado compleja aumentando el tiempo de ejecucion. Tampoco se pudo operar con mas de un pixel, ya que los condicionales podian dar resultados distintos para las diferentes componentes de cada pixel.
+
+Como en este caso nos encontramos con condicionles que cambiaban el flujo del programa, decidimos realizar pruebas de rendimiento con las imagenes $lena$ y $colores$ provistas por la catedra (ambas de 160x160), y agregar 3 imagenes que tengan unicamente color rojo, verde y azul. Esto nos permite ver si los diferentes caminos en el flujo del codigo en $C$ afectan el rendimiento. Los resultados fueron:
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.45]{images/hsl_comparationC}
 	\caption{C}
+\end{figure}
+
+\newpage
+\begin{figure}[h!]
+	\centering
 	\includegraphics[scale=0.45]{images/hsl_comparationASM1}
 	\caption{ASM1}
+\end{figure}	
+
+\begin{figure}[h!]
+	\centering
 	\includegraphics[scale=0.45]{images/hsl_comparationASM2}
 	\caption{ASM2}
 \end{figure}
 
-\newpage
+Para la implementacion en $C$ no hubo mayor diferencia en la cantidad de ciclos que tomo cada imagen, en donde si hubo un mejor rendimiento fue en las imagenes que tienen un solo color, consideramos que esto se debe a que en este caso el flujo del programa es siempre el mismo para todos los pixeles.
+Tambien se puede ver en las implementacion con SSE, que al tener menos saltos condicionales (o no tenerlos como es el caso de $ASM2$) el contenido de la imagen no impacta significativamente al rendimiento.
 
 % Al igual que con los dos casos anteriores, empezamos corriendo la version de $C$ con optimizaciones de nivel 3, junto con la imagen $lena$ brindada por la catedra, se tomaron cien muestras con versiones de la imagen que fuesen multiplos de 16x16, hasta llegar a 320x320. Aqui se encuentran graficados el maximo, minimo y el promedio:\\
 
@@ -366,8 +379,12 @@ Luego decidimos probar el algoritmo con diferentes imagenes para testear si los 
 % Aqui podemos ver que el valor de \texttt{HH} no afecta en gran manera al rendimiento, ya que la cantidad de ciclos se mantiene relativamente constante independientemente del \texttt{HH}, y al igual que el primer test, la implementacion de $C$ sigue teniendo mejor rendimiento.
 
 \subsection{Conclusion}
-En conclusion podemos ver que la version de C es la mas rapida, suponemos que esto es asi debido a que la prediccion de saltos del procesador es lo suficientemente buena como para que sea mas rapido que hacer las cosas usando SIMD y procesando todo usando mascaras.
+Aqui nos encontramos con un caso donde el paralelismo de SIMD no nos ayudo a mejorar el rendimiento, sino que lo empeoro. La cantidad de condicionales sobre cada una de las componentes del pixel hace que la aritmetica de las implementaciones de SSE tome una cantidad muy grande de ciclos de clock.
 
-Tambien podemos ver tambien que los saltos afectan la consistencia del algoritmo ya que la implementacion ASM2 posee tiempos de ejecucion mucho mas consistentes, en cambio la de C y ASM1 (La cual posee funciones con saltos) poseen variaciones en los tiempos de ejecucion.
+A pesar de su rendimiento, nos parece importante destacar que la implementacion $ASM2$ se ejecuto en un tiempo muy similar para las diferentes imagenes, en casos donde la consistencia sea mas valorada que la eficiencia se podria hacer uso de esta implementacion.
+
+%En conclusion podemos ver que la version de C es la mas rapida, suponemos que esto es asi debido a que la prediccion de saltos del procesador es lo suficientemente buena como para que sea mas rapido que hacer las cosas usando SIMD y procesando todo usando mascaras.
+
+%Tambien podemos ver tambien que los saltos afectan la consistencia del algoritmo ya que la implementacion ASM2 posee tiempos de ejecucion mucho mas consistentes, en cambio la de C y ASM1 (La cual posee funciones con saltos) poseen variaciones en los tiempos de ejecucion.
 
 % Este filtro trajo varias sorpresas respecto al rendimiento, si bien los condicionales afectaron en mayor o menor medida a la implementacion en $C$, esta termino siendo la mejor en practicamente todos los casos probados. Consideramos que esto se debe a que el trabajo que realiza el filtro no era amigable al paralelismo, es decir, muchas veces se realizaban calculos que luego terminan siendo filtrado por alguna mascara.

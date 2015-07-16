@@ -6,7 +6,7 @@ Para el recuperatorio decidimos hacer cambios en el codigo.
 La lista de cambios esta a continuacion, con la aclaracacion de por que se hicieron los mismos:
 \noindent
 \begin{itemize}
-\item Se remplazaron las operaciones que realizaban las copias por operaciones de SIMD para aumentar la velocidad a la que se copian los pixeles, tambien se modifico el codigo el cual antes copiaba las dos filas de pixeles superiores para que solo copie una (Swapeando los punteros de R13 con R12 y luego solo copiando en R13 los datos de la fila de pixeles del medio).
+\item Se remplazaron las operaciones que realizaban las copias por operaciones de $SIMD$ para aumentar la velocidad a la que se copian los pixeles, tambien se modifico el codigo el cual antes copiaba las dos filas de pixeles superiores para que solo copie una (Swapeando los punteros de $R13$ con $R12$ y luego solo copiando en $R13$ los datos de la fila de pixeles del medio).
 \end{itemize}
 
 \subsection{Explicacion}
@@ -91,7 +91,6 @@ Para eso calculamos primero los pixeles \texttt{P0} y \texttt{P1}, y despues el 
 
 Para hacer los calculos tomamos 6 set de 4 pixeles que nos permiten sumar en un solo registro 2 pixeles al mismo tiempo usando solo sumas, cada set ira adentro de un registro \texttt{XMM}. Ademas necesitamos 6 registros \texttt{XMM} mas para poder desempaquetar los bytes a words, y asi no tener saturacion. \\
 
-\newpage
 Al igual que la primer implementacion, necesitaremos los mismos 6 registros de proposito general. \\
 
 \begin{figure}[h!]
@@ -158,19 +157,22 @@ Como podemos apreciar, en este caso las cuentas tambien responden a lo presentad
 
 Una vez terminado el procesamiento de pixeles, comparamo el iterador con la cantidad de pixeles en una fila y repetimos hasta llegar hasta los ultimos 16 bytes de la fila, estos ultimos 16 bytes los cargamos en solo 3 registros \texttt{XMM} y los procesamos al igual que la primera parte del ciclo para asegurarme de no pasarnos. Al final del ciclo hacemos las copias pertinentes, incrementamos el iterador de filas y revisamos si llegamos al final. \\
 
+\newpage
 \subsection{Resultados}
-Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) para poder comparar la performance, vamos a usar la imagen de $lena$ brindada por la catedra (Resolucion 160x160). Se ejecutara cada implementacion del algoritmo 100 veces y luego se calculara el tiempo (Usando el time stamp counter del procesador y la funcion de C brindada por la catedra) minimo, maximo y promedio (Sumando todos los tiempos tomados y diviendo por el la cantidad de iteraciones). A continuacion graficamos los tiempos en un grafico de barras que esta a continuacion:
+Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) para poder comparar la performance, vamos a usar la imagen de $lena$ brindada por la catedra, la misma tiene resolucion de 160x160. No se probaron imagenes de tamaño variable ni con colores aleatorios, ya que la naturaleza lineal del algoritmo no impactaria de manera significativa, solamente aumenta la cantidad de pixeles a procesar.
+
+Para medir el rendimiento de las implementaciones utilizamos el Time Stamp Counter del procesador, se opto por esto en vez de tomar el tiempo del proceso ya que el mismo puede verse afectado por las variaciones de clock del procesador. Para calcular la cantidad de ciclos, se toma el $TSC$ antes de la ejecucion del codigo del filtro y se vuelve a tomar su valor una vez concluida la ejecucion del mismo, el resultado final se obtiene de restar ambos valores. Para poder obtener los valores se utilizo la funcion de $C$ provista por la catedra.
+
+Se ejecutara cada implementacion del algoritmo 100 veces y luego se calculara el tiempo minimo, maximo y promedio (Sumando todos los tiempos tomados y diviendo por el la cantidad de iteraciones). A continuacion graficamos los tiempos en un grafico de barras:
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.45]{images/blur_comparation}
 \end{figure}
 
-Con esto podemos ver que la implementacion ASM2 es un poco mas rapida que las otras implementaciones.
+Como podemos apreciar en el grafico, tanto $ASM1$ como $ASM2$ son mucho mas eficientes en terminos de tiempo que la implementacion en $C$. Esto se debe no solo a las operaciones aritmeticas en paralelo, sino tambien a la reduccion de accesos a memoria. Un punto a destacar fue la poca diferencia entre $ASM1$ y $ASM2$, a pesar de que la primera opera de a un pixel mientras que la segunda lo hace de a cuatro, el costo de la aritmetica en nuestra implementacion de $ASM2$ es tan grande que no se percibe un beneficio grande respecto a $ASM1$.
 
-Revisando el codigo podemos ver que el tamaño de la imagen solo deberia modificar cantidad de pixeles a procesar aumentando el tiempo de ejecucion solo por que se necesita hacer mas iteraciones, tambien podemos ver que el algoritmo es independiente del color de los pixeles a procesar.
-
-Para la reentrega se hicieron algunos cambios en el codigo que se supone que deberian mejorar la performance (Ver lista de cambios), decidimos correr el test explicado anteriormente el codigo nuevo y el codigo viejo para comfirmar que los cambios propuestos cumplan con su objetivo. En el siguiente grafico graficaron los tiempos maximos, minimo y promedio de ejecucion de la implementaciones de ASM.
+Para la reentrega se hicieron algunos cambios en el codigo que se supone que deberian mejorar la performance (Ver lista de cambios), decidimos correr el test explicado anteriormente el codigo nuevo y el codigo viejo para comfirmar que los cambios propuestos cumplan con su objetivo. En el siguiente grafico se encuentran los tiempos maximos, minimo y promedio de ejecucion de la implementaciones de $ASM$.
 
 \begin{figure}[h!]
 	\centering
@@ -178,6 +180,8 @@ Para la reentrega se hicieron algunos cambios en el codigo que se supone que deb
 \end{figure}
 
 \newpage
+
+Los cambios introducidos apuntan a hacer un uso mas fuerte de instrucciones SIMD en vez de SISD, y a reducir los accesos a memoria. Como podemos apreciar, estos dos cambios impactaron positivamente y el rendimiento mejoro.
 
 % Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320). Cada tamaño se ejecuta 100 veces, despues se saca un promedio y se lo grafica junto con el maximo y el minimo. La metodologia adoptada para evaluar la eficacia de las implementaciones es tomar la cantidad de ciclos que tarda en correr cada una de las implementaciones, esto lo hacemos mediante la libreria \texttt{rdtsc.h}, las pruebas van a ser ejecutadas en un \texttt{Intel Core i7 4700MQ}. Estas condiciones de prueba se mantendran durante el resto del informe y para todos los filtros.
 
@@ -208,9 +212,7 @@ Para la reentrega se hicieron algunos cambios en el codigo que se supone que deb
 % \end{figure}
 
 \subsection{Conclusion}
-Podemos concluir que en el caso de la utilizacion de instrucciones SIMD para la aplicacion del algoritmo de blur se puede ver que operar de a varios pixeles mejora un poco con respecto a operar de a un pixel pero al mismo tiempo tambien complica considerablemente el codigo que se debio implementar en nuestro caso.
-
-Igual la simple implementacion de instrucciones SIMD comparandola con el codigo C compilado se puede notar una diferencia conciderable en cuanto a la cantidad de ciclos de reloj usados por el mismo.
+El filtro de $blur$ es un claro ejemplo donde el uso de SIMD mejora ampliamente el rendimiento respecto a una implementacion secuencial tradicional. De las dos implementaciones que emplean SSE, se pudo ver que si bien trabajar de a mas pixeles ayuda a mejorar el rendimiento de los filtros, el codigo resultante termino siendo demasiado extenso y los beneficios obtenidos no fueron tan grandes. Esto no descarta que existan implementaciones diferentes en las cuales un mayor paralelismo impacte en mayor medida al rendimiento.
 
 % Luego de la experimentacion podemos concluir que ASM2 es el mas rapido en general. \\
 

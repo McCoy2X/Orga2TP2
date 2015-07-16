@@ -98,33 +98,35 @@ Al final tenemos:\\
 
 Para terminar solo fue necesario sumarlos y moverlos a memoria.
 
+\newpage
 \subsection{Resultados}
-Para la experimentacion vamos a correr las 3 implementaciones (La version de C compilada con optimizaciones de nivel 3) para poder comparar la performance, vamos a usar la imagenes de $lena$ y $colores$ brindadas por la catedra (Ambas con una resolucion 160x160). Se ejecutara cada implementacion del algoritmo 100 veces y luego se calculara el tiempo (Usando el time stamp counter del procesador y la funcion de C brindada por la catedra) minimo, maximo y promedio (Sumando todos los tiempos tomados y diviendo por el la cantidad de iteraciones). Luego pasamos a graficar los resultados para ver la performance de las mismas.
+Para la experimentacion de $merge$ se empleo la misma metodologia que en el caso de $blur$. El resultado obtenido fue el siguiente:
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.45]{images/merge_comparation}
 \end{figure}
 
-Con esto podemos ver claramente que la implementacion ASM2 corre mas rapida que las otras.
+Al igual que en el caso de $blur$ el uso del paralelismo de SIMD impacto positivamente en el rendimiento, las dos implementaciones con SSE terminaron siendo mas eficientes que la de $C$. Como era de esperar, en el caso de $ASM1$, el costo de conversion a $float$ termino impactando negativamente el rendimiento en un margen pequeño.
 
-Tambien decidimos correr la implementacion de la primera entrega y compararla con la nueva para ver si los cambios propuestos mejoraron la performance.
+Al igual que con $blur$, decidimos correr las implementaciones de la primer entrega y compararlas con las nuevas. Terminamos obteniendo:
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.45]{images/merge_comparationOLD}
 \end{figure}
 
-Esta experimentacion nos sorprendio ya que la eliminacion de branches tanto con los calls como con los jumps practicamente no cambio el tiempo de ejecucucion del programa, en la primera implementacion el cambio que vemos es principalmente por la manera en la que ahora hacemos el pasaje a memoria.
+Esta experimentacion nos sorprendio ya que la eliminacion de branches tanto con los calls como con los jumps practicamente no cambio el tiempo de ejecucucion del programa, en caso de $ASM1$ el cambio que vemos es principalmente motivado por la manera en la que ahora hacemos el pasaje a memoria.
 
-Luego de descubrir que la operacion PEXTRD y PINSRD son operaciones caras (Requieren varios ciclos de clock) decidimos probar si era mas rapido usar estas instrucciones o hacer 4 copias a memoria directamente desde el registro XMM usando MOVD.
+\newpage
+Luego de descubrir que la operacion \texttt{PEXTRD} y \texttt{PINSRD} son operaciones caras (Requieren varios ciclos de clock) decidimos probar si era mas rapido usar estas instrucciones o hacer 4 copias a memoria directamente desde el registro \texttt{XMM} usando \texttt{MOVD}.
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.45]{images/merge_extractmov}
 \end{figure}
 
-Con esto podemos ver que las operaciones de extraccion e incercion de codigo son mas caras que hacer los 4 accesos a memoria.
+Con esto podemos ver que las operaciones de extraccion e insercion de codigo son mas caras que hacer los 4 accesos a memoria.
 
 % Para la experimentacion vamos a correr las 3 implementaciones (La version de $C$ compilada con optimizaciones de nivel 3) con la imagen de $lena$ brindada por la catedra (multiplos de 16x16, hasta 320x320), se corren 100 veces cada tamaño y despues se saca un promedio y se grafica el maximo, el minimo y el promedio.
 
@@ -154,6 +156,7 @@ Con esto podemos ver que las operaciones de extraccion e incercion de codigo son
 % \end{figure}
 
 \subsection{Conclusion}
-Finalmente podemos concluir que la implementacion de ASM2 es la mas rapida de todas ya que al trabajar con bytes en vez de floats nos permite aprobecharnos mucho mas de las instrucciones SIMD reduciendo la cantidad de operaciones logradas.
+
+En el caso de $merge$ podemos volver a apreciar la eficiencia de utilizar SIMD en la implementacion, en este caso incluso la diferencia es mas marcada que en el de $blur$, particularmente por la simpleza del algoritmo en si. Tal como esperabamos, la implementacion utilizando $float$ via conversiones termino tomando mas ciclos de reloj que la que se maneja directamente con numeros enteros. Por ultimo, consideramos importante destacar la efectividad del predictor de saltos, ya que este minimizo efectivamente el costo de los mismos.
 
 % Al igual que en el primer filtro, las implementacion de $Assembler$ terminaron siendo mas veloces que la de $C$. La consistencia de los resultados tambien nos lleva a concluir que el costo en tiempo de hacer las conversiones en la primer implementacion es considerable, ya que la segunda version, al estar realizada sobre enteros minimizando las operaciones de punto flotante, tardo considerablemente menos.	
